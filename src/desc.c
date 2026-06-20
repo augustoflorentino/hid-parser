@@ -1,0 +1,221 @@
+#include "hidp_internal.h"
+#include "hidp_bitspan.h"
+
+#include <string.h>
+
+size_t hidp_desc_field_count(const hidp_desc_t *desc)
+{
+    return desc != NULL ? desc->fields.len : 0u;
+}
+
+const hidp_field_t *hidp_desc_field(const hidp_desc_t *desc, size_t index)
+{
+    if (desc == NULL || index >= desc->fields.len)
+        return NULL;
+    return (const hidp_field_t *)desc->fields.data + index;
+}
+
+size_t hidp_desc_collection_count(const hidp_desc_t *desc)
+{
+    return desc != NULL ? desc->collections.len : 0u;
+}
+
+const hidp_collection_t *hidp_desc_collection(const hidp_desc_t *desc, size_t index)
+{
+    if (desc == NULL || index >= desc->collections.len)
+        return NULL;
+    return (const hidp_collection_t *)desc->collections.data + index;
+}
+
+size_t hidp_desc_report_count(const hidp_desc_t *desc)
+{
+    return desc != NULL ? desc->reports.len : 0u;
+}
+
+const hidp_report_t *hidp_desc_report(const hidp_desc_t *desc, size_t index)
+{
+    if (desc == NULL || index >= desc->reports.len)
+        return NULL;
+    return (const hidp_report_t *)desc->reports.data + index;
+}
+
+size_t hidp_desc_warning_count(const hidp_desc_t *desc)
+{
+    return desc != NULL ? desc->warnings.len : 0u;
+}
+
+const hidp_warning_t *hidp_desc_warning(const hidp_desc_t *desc, size_t index)
+{
+    if (desc == NULL || index >= desc->warnings.len)
+        return NULL;
+    return (const hidp_warning_t *)desc->warnings.data + index;
+}
+
+const hidp_report_t *hidp_desc_find_report(const hidp_desc_t *desc, unsigned type, unsigned id)
+{
+    const hidp_report_t *r;
+    size_t i;
+
+    for (i = 0; i < hidp_desc_report_count(desc); i++) {
+        r = hidp_desc_report(desc, i);
+        if (r->type == type && r->id == id)
+            return r;
+    }
+    return NULL;
+}
+
+const hidp_report_t *hidp_desc_match_report(const hidp_desc_t *desc, unsigned type,
+                                            const unsigned char *report, size_t report_len)
+{
+    const hidp_report_t *r = hidp_desc_find_report(desc, type, 0u);
+
+    if (r != NULL || report == NULL || report_len == 0u)
+        return r;
+    return hidp_desc_find_report(desc, type, report[0]);
+}
+
+int hidp_field_usage(const hidp_field_t *field, size_t index, uint32_t *out_usage)
+{
+    size_t i;
+    size_t span;
+
+    if (field == NULL || out_usage == NULL)
+        return HIDP_ERR_ARG;
+    if (field->usage_count == 0u)
+        return HIDP_ERR_NOT_FOUND;
+    if (index >= field->usage_count)
+        index = field->usage_count - 1u;
+    for (i = 0; i < field->usages_len; i++) {
+        span = (size_t)(field->usages[i].max - field->usages[i].min);
+        if (index <= span) {
+            *out_usage = field->usages[i].min + (uint32_t)index;
+            return HIDP_OK;
+        }
+        index -= span + 1u;
+    }
+    return HIDP_ERR_NOT_FOUND;
+}
+
+static int hidp_field_bits(const hidp_field_t *field, size_t report_len, size_t index,
+                           size_t *out_bit)
+{
+    if (field->report_size == 0u || field->report_size > 32u)
+        return HIDP_ERR_RANGE;
+    if (index >= field->report_count)
+        return HIDP_ERR_BOUNDS;
+    *out_bit = field->bit_offset + index * field->report_size;
+    if (bitf_check(report_len, *out_bit, field->report_size, BITF_LE) != BITF_OK)
+        return HIDP_ERR_BOUNDS;
+    return HIDP_OK;
+}
+
+static int hidp_id_matches(const hidp_field_t *field, const unsigned char *report)
+{
+    return field->report_id == 0u || report[0] == field->report_id;
+}
+
+int hidp_field_get(const hidp_field_t *field, const unsigned char *report, size_t report_len,
+                   size_t index, int32_t *out_value)
+{
+    size_t bit;
+    int64_t sv;
+    uint64_t uv;
+    int status;
+
+    if (field == NULL || report == NULL || out_value == NULL)
+        return HIDP_ERR_ARG;
+    status = hidp_field_bits(field, report_len, index, &bit);
+    if (status != HIDP_OK)
+        return status;
+    if (!hidp_id_matches(field, report))
+        return HIDP_ERR_NOT_FOUND;
+    if (field->logical_min < 0) {
+        bitf_get_signed(report, report_len, bit, field->report_size, BITF_LE, &sv);
+        *out_value = (int32_t)sv;
+        return HIDP_OK;
+    }
+    bitf_get(report, report_len, bit, field->report_size, BITF_LE, &uv);
+    *out_value = uv <= (uint64_t)INT32_MAX ? (int32_t)uv : -(int32_t)(~(uint32_t)uv) - 1;
+    return HIDP_OK;
+}
+
+int hidp_field_set(const hidp_field_t *field, unsigned char *report, size_t report_len,
+                   size_t index, int32_t value)
+{
+    size_t bit;
+    int status;
+
+    if (field == NULL || report == NULL)
+        return HIDP_ERR_ARG;
+    status = hidp_field_bits(field, report_len, index, &bit);
+    if (status != HIDP_OK)
+        return status;
+    if (!hidp_id_matches(field, report))
+        return HIDP_ERR_NOT_FOUND;
+    if (field->logical_min < 0)
+        status = bitf_set_signed(report, report_len, bit, field->report_size, BITF_LE, value);
+    else
+        status = bitf_set(report, report_len, bit, field->report_size, BITF_LE,
+                          (uint64_t)(uint32_t)value);
+    return status == BITF_OK ? HIDP_OK : HIDP_ERR_RANGE;
+}
+
+int hidp_field_in_range(const hidp_field_t *field, int32_t value)
+{
+    if (field == NULL)
+        return 0;
+    if (field->logical_min < 0)
+        return value >= field->logical_min && value <= field->logical_max;
+    return (uint32_t)value >= (uint32_t)field->logical_min
+           && (uint32_t)value <= (uint32_t)field->logical_max;
+}
+
+int hidp_field_array_usage(const hidp_field_t *field, int32_t value, uint32_t *out_usage)
+{
+    if (field == NULL || out_usage == NULL || (field->flags & HIDP_FLAG_VARIABLE))
+        return HIDP_ERR_ARG;
+    if (!hidp_field_in_range(field, value))
+        return HIDP_ERR_NOT_FOUND;
+    if ((uint32_t)value - (uint32_t)field->logical_min >= field->usage_count)
+        return HIDP_ERR_NOT_FOUND;
+    return hidp_field_usage(field, (uint32_t)value - (uint32_t)field->logical_min, out_usage);
+}
+
+int hidp_desc_find_usage(const hidp_desc_t *desc, unsigned type, uint32_t usage,
+                         size_t start_field, size_t *out_field, size_t *out_index)
+{
+    const hidp_field_t *f;
+    uint32_t u;
+    size_t i;
+    size_t j;
+
+    if (desc == NULL)
+        return HIDP_ERR_ARG;
+    for (i = start_field; i < desc->fields.len; i++) {
+        f = hidp_desc_field(desc, i);
+        if (f->report_type != type)
+            continue;
+        for (j = 0; j < f->usage_count; j++) {
+            if (hidp_field_usage(f, j, &u) != HIDP_OK || u != usage)
+                continue;
+            if (out_field != NULL)
+                *out_field = i;
+            if (out_index != NULL)
+                *out_index = j;
+            return HIDP_OK;
+        }
+    }
+    return HIDP_ERR_NOT_FOUND;
+}
+
+int hidp_report_init(const hidp_report_t *report, unsigned char *buf, size_t buf_len)
+{
+    if (report == NULL || buf == NULL)
+        return HIDP_ERR_ARG;
+    if (buf_len < report->byte_len)
+        return HIDP_ERR_BOUNDS;
+    memset(buf, 0, report->byte_len);
+    if (report->id != 0u)
+        buf[0] = (unsigned char)report->id;
+    return HIDP_OK;
+}

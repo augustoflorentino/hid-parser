@@ -8,7 +8,7 @@ option(HID_PARSER_BUILD_FUZZ "Build libFuzzer targets" OFF)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-add_library(hid-parser src/tokenize.c src/parse.c src/desc.c src/names.c)
+add_library(hid-parser src/tokenize.c src/parse.c src/desc.c src/names.c src/usage_names.c)
 add_library(hid-parser::hid-parser ALIAS hid-parser)
 target_include_directories(hid-parser PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -50,6 +50,13 @@ if(HID_PARSER_BUILD_TESTS)
     add_executable(test_hid-parser tests/test_hid-parser.c)
     target_link_libraries(test_hid-parser PRIVATE hid-parser)
     add_test(NAME hid-parser COMMAND test_hid-parser)
+    add_executable(test_usage_names tests/test_usage_names.c)
+    target_link_libraries(test_usage_names PRIVATE hid-parser)
+    add_test(NAME usage_names COMMAND test_usage_names)
+    add_executable(hiddump_test examples/hiddump.c)
+    target_link_libraries(hiddump_test PRIVATE hid-parser)
+    add_test(NAME corpus COMMAND ${CMAKE_COMMAND} -DDUMP=$<TARGET_FILE:hiddump_test>
+        -DCORPUS=${PROJECT_SOURCE_DIR}/tests/corpus -P ${PROJECT_SOURCE_DIR}/tests/corpus/check.cmake)
     add_library(hid-parser_header_check OBJECT tests/header_check.c)
     target_include_directories(hid-parser_header_check PRIVATE include)
 endif()

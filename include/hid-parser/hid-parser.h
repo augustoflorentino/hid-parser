@@ -201,6 +201,8 @@ HIDP_API int hidp_field_array_usage(const hidp_field_t *field, int32_t value,
 HIDP_API int hidp_field_in_range(const hidp_field_t *field, int32_t value);
 HIDP_API int hidp_report_init(const hidp_report_t *report, unsigned char *buf, size_t buf_len);
 
+HIDP_API const char *hidp_usage_page_name(uint32_t page);
+HIDP_API const char *hidp_usage_name(uint32_t usage);
 HIDP_API const char *hidp_item_name(unsigned type, unsigned tag);
 HIDP_API const char *hidp_strerror(int status);
 

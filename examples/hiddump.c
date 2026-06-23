@@ -95,14 +95,17 @@ static int print_item(void *ctx, const hidp_item_t *item)
 
 static void print_usages(const hidp_field_t *f)
 {
+    char lo[96];
+    char hi[96];
     size_t i;
 
     for (i = 0; i < f->usages_len; i++) {
+        hidp_usage_format(f->usages[i].min, lo, sizeof(lo));
+        hidp_usage_format(f->usages[i].max, hi, sizeof(hi));
         if (f->usages[i].min == f->usages[i].max)
-            printf("%s0x%08x", i ? "," : "", (unsigned)f->usages[i].min);
+            printf("%s%s", i ? ", " : "", lo);
         else
-            printf("%s0x%08x-0x%08x", i ? "," : "", (unsigned)f->usages[i].min,
-                   (unsigned)f->usages[i].max);
+            printf("%s%s..%s", i ? ", " : "", lo, hi);
     }
 }
 
@@ -152,6 +155,21 @@ static void print_slots(const hidp_field_t *f)
     printf("\n");
 }
 
+static void print_kernel_field(const hidp_field_t *f)
+{
+    uint32_t usage;
+    size_t i;
+
+    printf("%c %u %zu %u %u %u %ld %ld %ld %ld %ld 0x%lx %zu ", type_names[f->report_type][0],
+           f->report_id, f->bit_offset, f->report_size, f->report_count, f->flags,
+           (long)f->logical_min, (long)f->logical_max, (long)f->physical_min,
+           (long)f->physical_max, (long)f->unit_exponent, (unsigned long)f->unit,
+           f->usage_count);
+    for (i = 0; i < f->usage_count && hidp_field_usage(f, i, &usage) == HIDP_OK; i++)
+        printf("%s0x%08x", i ? "," : "", (unsigned)usage);
+    printf("%s\n", f->usage_count ? "" : "-");
+}
+
 static void dump(const hidp_desc_t *desc, int slots)
 {
     const hidp_collection_t *c;
@@ -162,15 +180,17 @@ static void dump(const hidp_desc_t *desc, int slots)
         printf("kind %u\n", hidp_desc_kind(desc));
     for (i = 0; !slots && i < hidp_desc_collection_count(desc); i++) {
         c = hidp_desc_collection(desc, i);
-        printf("%*scollection type=%u usage=0x%08x\n", (int)c->depth * 2, "", c->type,
-               (unsigned)c->usage);
+        printf("%*scollection type=%u usage=0x%08x %s\n", (int)c->depth * 2, "", c->type,
+               (unsigned)c->usage, hidp_usage_name(c->usage) ? hidp_usage_name(c->usage) : "");
     }
     for (i = 0; !slots && i < hidp_desc_report_count(desc); i++) {
         r = hidp_desc_report(desc, i);
         printf("report %-7s id=%-3u bytes=%zu\n", type_names[r->type], r->id, r->byte_len);
     }
     for (i = 0; i < hidp_desc_field_count(desc); i++) {
-        if (slots)
+        if (slots == 3)
+            print_kernel_field(hidp_desc_field(desc, i));
+        else if (slots)
             print_slots(hidp_desc_field(desc, i));
         else
             print_field(hidp_desc_field(desc, i));
@@ -191,6 +211,8 @@ static int parse_args(int argc, char **argv, unsigned *flags, int *slots, const 
             *flags = HIDP_PARSE_TOLERANT;
         else if (strcmp(argv[i], "--slots") == 0)
             *slots = (*slots & 4) | 1;
+        else if (strcmp(argv[i], "--fields") == 0)
+            *slots = (*slots & 4) | 3;
         else if (strcmp(argv[i], "--items") == 0)
             *slots = (*slots & 4) | 2;
         else if (strcmp(argv[i], "--hex") == 0)
@@ -216,7 +238,7 @@ int main(int argc, char **argv)
     int status;
 
     if (parse_args(argc, argv, &flags, &slots, &path) != 0) {
-        fprintf(stderr, "usage: hiddump [--strict|--tolerant] [--slots|--items] [--hex] [descriptor]\n");
+        fprintf(stderr, "usage: hiddump [--strict|--tolerant] [--slots|--fields|--items] [--hex] [descriptor]\n");
         return 2;
     }
     if (path != NULL && (in = fopen(path, "rb")) == NULL) {

@@ -1,5 +1,7 @@
 #include "hidp_internal.h"
 
+#include <stdio.h>
+
 static const char *const hidp_main_names[16] = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     "Input", "Output", "Collection", "Feature", "End Collection", NULL, NULL, NULL,
@@ -59,4 +61,29 @@ const char *hidp_strerror(int status)
     if (status < 0 || (size_t)status >= sizeof(hidp_errors) / sizeof(hidp_errors[0]))
         return "unknown error";
     return hidp_errors[status];
+}
+
+static int hidp_generated_page(uint32_t page)
+{
+    return page == 0x09u || page == 0x0au || page == 0x81u;
+}
+
+int hidp_usage_format(uint32_t usage, char *buf, size_t buf_len)
+{
+    const char *name = hidp_usage_name(usage);
+    const char *page = hidp_usage_page_name(usage >> 16);
+    uint32_t id = usage & 0xffffu;
+    int n;
+
+    if (buf == NULL || buf_len == 0u)
+        return HIDP_ERR_ARG;
+    if (name != NULL && hidp_generated_page(usage >> 16))
+        n = snprintf(buf, buf_len, "%s %lu", name, (unsigned long)id);
+    else if (name != NULL)
+        n = snprintf(buf, buf_len, "%s", name);
+    else if (page != NULL)
+        n = snprintf(buf, buf_len, "%s 0x%04lx", page, (unsigned long)id);
+    else
+        n = snprintf(buf, buf_len, "0x%08lx", (unsigned long)usage);
+    return n >= 0 && (size_t)n < buf_len ? HIDP_OK : HIDP_ERR_BOUNDS;
 }

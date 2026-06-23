@@ -399,6 +399,19 @@ static void test_classify(void)
     CHECK(hidp_usage_role(0x000c00e9) == HIDP_ROLE_OTHER);
 }
 
+static void test_format(void)
+{
+    char buf[64];
+
+    CHECK(hidp_usage_format(0x00090005, buf, sizeof(buf)) == HIDP_OK && strcmp(buf, "Button 5") == 0);
+    CHECK(hidp_usage_format(0x00010030, buf, sizeof(buf)) == HIDP_OK && strcmp(buf, "X") == 0);
+    CHECK(hidp_usage_format(0xff000001, buf, sizeof(buf)) == HIDP_OK);
+    CHECK(strcmp(buf, "Vendor-defined 0x0001") == 0);
+    CHECK(hidp_usage_format(0x7f000001, buf, sizeof(buf)) == HIDP_OK && strcmp(buf, "0x7f000001") == 0);
+    CHECK(hidp_usage_format(0x00090005, buf, 8) == HIDP_ERR_BOUNDS && strcmp(buf, "Button ") == 0);
+    CHECK(hidp_usage_format(0x00090005, NULL, 8) == HIDP_ERR_ARG);
+}
+
 static void test_bad_args(void)
 {
     hidp_desc_t *d = NULL;
@@ -462,6 +475,7 @@ int main(void)
     test_collections_and_delimiters();
     test_values();
     test_classify();
+    test_format();
     test_bad_args();
     test_alloc_failure();
     return 0;

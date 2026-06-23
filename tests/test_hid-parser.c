@@ -371,6 +371,34 @@ static void test_values(void)
     hidp_desc_destroy(d);
 }
 
+static void test_classify(void)
+{
+    static const unsigned char pad[] = {0x06, 0x00, 0xff, 0x09, 0x01, 0xa1, 0x01, 0xc0,
+                                        0x05, 0x01, 0x09, 0x05, 0xa1, 0x01, 0xc0};
+    static const unsigned char vendor[] = {0x06, 0x00, 0xff, 0x09, 0x01, 0xa1, 0x01, 0xc0};
+    hidp_desc_t *d;
+
+    CHECK(PARSE(mouse, 0, &d) == HIDP_OK && hidp_desc_kind(d) == HIDP_KIND_MOUSE);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(pad, 0, &d) == HIDP_OK && hidp_desc_kind(d) == HIDP_KIND_GAMEPAD);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(vendor, 0, &d) == HIDP_OK && hidp_desc_kind(d) == HIDP_KIND_VENDOR);
+    hidp_desc_destroy(d);
+    CHECK(hidp_desc_kind(NULL) == HIDP_KIND_UNKNOWN);
+    CHECK(hidp_usage_kind(0x000d0005) == HIDP_KIND_TOUCHPAD);
+    CHECK(hidp_usage_kind(0x000c0001) == HIDP_KIND_CONSUMER);
+    CHECK(hidp_usage_kind(0x00010003) == HIDP_KIND_UNKNOWN);
+    CHECK(hidp_usage_role(0x00010031) == HIDP_ROLE_AXIS);
+    CHECK(hidp_usage_role(0x00010039) == HIDP_ROLE_HAT);
+    CHECK(hidp_usage_role(0x00010090) == HIDP_ROLE_BUTTON);
+    CHECK(hidp_usage_role(0x00090010) == HIDP_ROLE_BUTTON);
+    CHECK(hidp_usage_role(0x00070004) == HIDP_ROLE_KEY);
+    CHECK(hidp_usage_role(0x00080001) == HIDP_ROLE_LED);
+    CHECK(hidp_usage_role(0x000f0097) == HIDP_ROLE_HAPTIC);
+    CHECK(hidp_usage_role(0xff000001) == HIDP_ROLE_VENDOR);
+    CHECK(hidp_usage_role(0x000c00e9) == HIDP_ROLE_OTHER);
+}
+
 static void test_bad_args(void)
 {
     hidp_desc_t *d = NULL;
@@ -433,6 +461,7 @@ int main(void)
     test_usage_limit();
     test_collections_and_delimiters();
     test_values();
+    test_classify();
     test_bad_args();
     test_alloc_failure();
     return 0;

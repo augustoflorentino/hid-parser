@@ -31,6 +31,68 @@ static unsigned char *read_all(FILE *in, size_t *out_len)
     return data;
 }
 
+static size_t parse_hex(unsigned char *data, size_t len)
+{
+    size_t out = 0;
+    size_t i = 0;
+    int high = -1;
+    int v;
+
+    while (i < len) {
+        unsigned char c = data[i++];
+
+        if (c == '0' && i < len && (data[i] == 'x' || data[i] == 'X')) {
+            i++;
+            continue;
+        }
+        v = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10
+            : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1;
+        if (v < 0) {
+            high = -1;
+            continue;
+        }
+        if (high < 0) {
+            high = v;
+            continue;
+        }
+        data[out++] = (unsigned char)(high << 4 | v);
+        high = -1;
+    }
+    return out;
+}
+
+typedef struct {
+    int depth;
+} tree_t;
+
+static int print_item(void *ctx, const hidp_item_t *item)
+{
+    tree_t *tree = ctx;
+    char hex[64];
+    size_t n = 0;
+    size_t i;
+
+    if (item->type == HIDP_ITEM_MAIN && item->tag == HIDP_MAIN_END_COLLECTION && tree->depth > 0)
+        tree->depth--;
+    n += (size_t)snprintf(hex, sizeof(hex), "0x%02x,", item->data[-1 - (item->type == HIDP_ITEM_LONG ? 2 : 0)]);
+    for (i = 0; i < item->data_len && i < 4u && n < sizeof(hex) - 8u; i++)
+        n += (size_t)snprintf(hex + n, sizeof(hex) - n, " 0x%02x,", item->data[i]);
+    printf("%-30s // %*s%s", hex, tree->depth * 2, "", hidp_item_name(item->type, item->tag));
+    if (item->type == HIDP_ITEM_GLOBAL && (item->tag == HIDP_GLOBAL_LOGICAL_MIN
+                                           || item->tag == HIDP_GLOBAL_PHYSICAL_MIN))
+        printf(" (%ld)\n", (long)item->sdata);
+    else if (item->type == HIDP_ITEM_GLOBAL && item->tag != HIDP_GLOBAL_USAGE_PAGE
+             && item->tag != HIDP_GLOBAL_UNIT && item->data_len > 0u)
+        printf(" (%lu)\n", (unsigned long)item->udata);
+    else if (item->data_len > 0u && item->type != HIDP_ITEM_LONG)
+        printf(" (0x%lx)\n", (unsigned long)item->udata);
+    else
+        printf("\n");
+    if (item->type == HIDP_ITEM_MAIN && item->tag == HIDP_MAIN_COLLECTION)
+        tree->depth++;
+    return 0;
+}
+
 static void print_usages(const hidp_field_t *f)
 {
     size_t i;
@@ -96,6 +158,8 @@ static void dump(const hidp_desc_t *desc, int slots)
     const hidp_report_t *r;
     size_t i;
 
+    if (!slots)
+        printf("kind %u\n", hidp_desc_kind(desc));
     for (i = 0; !slots && i < hidp_desc_collection_count(desc); i++) {
         c = hidp_desc_collection(desc, i);
         printf("%*scollection type=%u usage=0x%08x\n", (int)c->depth * 2, "", c->type,
@@ -126,7 +190,11 @@ static int parse_args(int argc, char **argv, unsigned *flags, int *slots, const 
         else if (strcmp(argv[i], "--tolerant") == 0)
             *flags = HIDP_PARSE_TOLERANT;
         else if (strcmp(argv[i], "--slots") == 0)
-            *slots = 1;
+            *slots = (*slots & 4) | 1;
+        else if (strcmp(argv[i], "--items") == 0)
+            *slots = (*slots & 4) | 2;
+        else if (strcmp(argv[i], "--hex") == 0)
+            *slots |= 4;
         else if (*path == NULL)
             *path = argv[i];
         else
@@ -148,7 +216,7 @@ int main(int argc, char **argv)
     int status;
 
     if (parse_args(argc, argv, &flags, &slots, &path) != 0) {
-        fprintf(stderr, "usage: hiddump [--strict|--tolerant] [--slots] [descriptor]\n");
+        fprintf(stderr, "usage: hiddump [--strict|--tolerant] [--slots|--items] [--hex] [descriptor]\n");
         return 2;
     }
     if (path != NULL && (in = fopen(path, "rb")) == NULL) {
@@ -160,6 +228,19 @@ int main(int argc, char **argv)
         fclose(in);
     if (data == NULL)
         return 1;
+    if (slots & 4) {
+        len = parse_hex(data, len);
+        slots &= 3;
+    }
+    if (slots == 2) {
+        tree_t tree = {0};
+
+        status = hidp_tokenize(data, len, print_item, &tree, &error_offset);
+        free(data);
+        if (status != HIDP_OK)
+            fprintf(stderr, "error at byte %zu: %s\n", error_offset, hidp_strerror(status));
+        return status != HIDP_OK;
+    }
     status = hidp_desc_parse(data, len, flags, NULL, NULL, NULL, &desc, &error_offset);
     free(data);
     if (status != HIDP_OK) {

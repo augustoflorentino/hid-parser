@@ -101,6 +101,32 @@ extern "C" {
 #define HIDP_COLLECTION_USAGE_SWITCH 0x05u
 #define HIDP_COLLECTION_USAGE_MODIFIER 0x06u
 
+#define HIDP_KIND_UNKNOWN 0u
+#define HIDP_KIND_POINTER 1u
+#define HIDP_KIND_MOUSE 2u
+#define HIDP_KIND_JOYSTICK 3u
+#define HIDP_KIND_GAMEPAD 4u
+#define HIDP_KIND_KEYBOARD 5u
+#define HIDP_KIND_KEYPAD 6u
+#define HIDP_KIND_MULTI_AXIS 7u
+#define HIDP_KIND_SYSTEM 8u
+#define HIDP_KIND_CONSUMER 9u
+#define HIDP_KIND_DIGITIZER 10u
+#define HIDP_KIND_PEN 11u
+#define HIDP_KIND_TOUCHSCREEN 12u
+#define HIDP_KIND_TOUCHPAD 13u
+#define HIDP_KIND_SENSOR 14u
+#define HIDP_KIND_VENDOR 15u
+
+#define HIDP_ROLE_OTHER 0u
+#define HIDP_ROLE_BUTTON 1u
+#define HIDP_ROLE_AXIS 2u
+#define HIDP_ROLE_HAT 3u
+#define HIDP_ROLE_KEY 4u
+#define HIDP_ROLE_LED 5u
+#define HIDP_ROLE_HAPTIC 6u
+#define HIDP_ROLE_VENDOR 7u
+
 #define HIDP_NONE ((size_t)-1)
 
 typedef struct hidp_desc hidp_desc_t;
@@ -203,6 +229,10 @@ HIDP_API int hidp_report_init(const hidp_report_t *report, unsigned char *buf, s
 
 HIDP_API const char *hidp_usage_page_name(uint32_t page);
 HIDP_API const char *hidp_usage_name(uint32_t usage);
+HIDP_API unsigned hidp_usage_kind(uint32_t usage);
+HIDP_API unsigned hidp_desc_kind(const hidp_desc_t *desc);
+HIDP_API unsigned hidp_usage_role(uint32_t usage);
+
 HIDP_API const char *hidp_item_name(unsigned type, unsigned tag);
 HIDP_API const char *hidp_strerror(int status);
 

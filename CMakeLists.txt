@@ -8,7 +8,7 @@ option(HID_PARSER_BUILD_FUZZ "Build libFuzzer targets" OFF)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-add_library(hid-parser src/tokenize.c src/parse.c src/desc.c src/names.c src/usage_names.c)
+add_library(hid-parser src/tokenize.c src/parse.c src/desc.c src/names.c src/usage_names.c src/classify.c)
 add_library(hid-parser::hid-parser ALIAS hid-parser)
 target_include_directories(hid-parser PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

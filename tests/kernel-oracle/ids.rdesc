@@ -1,0 +1,30 @@
+05 01 09 06 a1 01 85 02 05 08 19 01 29 02 15 00 25 01 75 01 95 02 91 02 95 06 91 01 05 20 0a 01 12 75 08 95 01 15 00 26 ff 00 35 00 45 0a 65 11 55 0e b1 02 c0 
+
+  OUTPUT(2)[OUTPUT]
+    Field(0)
+      Application(GenericDesktop.Keyboard)
+      Usage(2)
+        LED.NumLock
+        LED.CapsLock
+      Logical Minimum(0)
+      Logical Maximum(1)
+      Report Size(1)
+      Report Count(2)
+      Report Offset(0)
+      Flags( Variable Absolute )
+  FEATURE(2)[FEATURE]
+    Field(0)
+      Application(GenericDesktop.Keyboard)
+      Usage(1)
+        Sensors.Event-Change
+      Logical Minimum(0)
+      Logical Maximum(255)
+      Physical Minimum(0)
+      Physical Maximum(10)
+      Unit Exponent(-2)
+      Unit(SI Linear : Centimeter)
+      Report Size(8)
+      Report Count(1)
+      Report Offset(0)
+      Flags( Variable Absolute )
+

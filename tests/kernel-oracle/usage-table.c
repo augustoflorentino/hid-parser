@@ -1,0 +1,21 @@
+static const struct hid_usage_entry hid_usage_table[] = {
+	{ 0x01, 0, "GenericDesktop" },
+		{ 0x01, 0x0001, "Pointer" },
+		{ 0x01, 0x0002, "Mouse" },
+		{ 0x01, 0x0006, "Keyboard" },
+		{ 0x01, 0x0030, "X" },
+		{ 0x01, 0x0031, "Y" },
+		{ 0x01, 0x0038, "Wheel" },
+	{ 0x07, 0, "KeyboardKeypad" },
+	{ 0x08, 0, "LED" },
+		{ 0x08, 0x0001, "NumLock" },
+		{ 0x08, 0x0002, "CapsLock" },
+	{ 0x09, 0, "Button" },
+	{ 0x0c, 0, "Consumer" },
+		{ 0x0c, 0x0238, "ACPan" },
+	{ 0x20, 0, "Sensors" },
+		{ 0x20, 0x0200, "Data" },
+		{ 0x20, 0x0201, "Event" },
+		{ 0x20, 0x1000, "-Change" },
+	{ 0, 0, NULL }
+};

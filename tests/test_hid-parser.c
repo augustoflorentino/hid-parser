@@ -290,6 +290,30 @@ static void test_usage_limit(void)
     hidp_desc_destroy(d);
 }
 
+static void test_usage_overflow(void)
+{
+    static const unsigned char full_then_more[] = {
+        0x05, 0x09, 0x19, 0x00, 0x2a, 0xff, 0x2f, 0x19, 0x00, 0x29, 0x05,
+        0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x01, 0x81, 0x02,
+    };
+    static const unsigned char max_below_min[] = {0x05, 0x09, 0x19, 0x05, 0x29, 0x03, 0x15, 0x00,
+                                                  0x25, 0x01, 0x75, 0x01, 0x95, 0x01, 0x81, 0x02};
+    const hidp_field_t *f;
+    hidp_desc_t *d;
+
+    CHECK(PARSE(full_then_more, 0, &d) == HIDP_ERR_USAGES && d == NULL);
+    CHECK(PARSE(full_then_more, HIDP_PARSE_TOLERANT, &d) == HIDP_OK);
+    CHECK(hidp_desc_field(d, 0)->usage_count == 12288);
+    CHECK(hidp_desc_field(d, 0)->usages_len == 1);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(max_below_min, 0, &d) == HIDP_OK);
+    f = hidp_desc_field(d, 0);
+    CHECK(f->usage_count == 12288 && usage_at(f, 0) == 0x00090005);
+    CHECK(usage_at(f, 12287) == 0x00093004);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(max_below_min, HIDP_PARSE_STRICT, &d) == HIDP_ERR_VALUE);
+}
+
 static void test_collections_and_delimiters(void)
 {
     static const unsigned char open[] = {0xa1, 0x01};
@@ -299,6 +323,8 @@ static void test_collections_and_delimiters(void)
                                           0x75, 0x08, 0x95, 0x02, 0x81, 0x02};
     static const unsigned char nested[] = {0xa9, 0x01, 0xa9, 0x01};
     static const unsigned char unclosed[] = {0xa9, 0x01, 0x81, 0x02};
+    static const unsigned char trailing[] = {0x09, 0x30, 0x75, 0x01, 0x95, 0x08, 0x81, 0x02, 0xa9, 0x01};
+    size_t err = 0;
     hidp_desc_t *d;
 
     CHECK(PARSE(open, 0, &d) == HIDP_ERR_COLLECTION);
@@ -312,6 +338,12 @@ static void test_collections_and_delimiters(void)
     hidp_desc_destroy(d);
     CHECK(PARSE(nested, 0, &d) == HIDP_ERR_DELIMITER);
     CHECK(PARSE(unclosed, 0, &d) == HIDP_OK);
+    hidp_desc_destroy(d);
+    CHECK(hidp_desc_parse(trailing, sizeof(trailing), 0, NULL, NULL, NULL, &d, &err)
+          == HIDP_ERR_DELIMITER);
+    CHECK(err == sizeof(trailing));
+    CHECK(PARSE(trailing, HIDP_PARSE_TOLERANT, &d) == HIDP_OK);
+    CHECK(hidp_desc_warning(d, 0)->code == HIDP_ERR_DELIMITER);
     hidp_desc_destroy(d);
 }
 
@@ -472,6 +504,7 @@ int main(void)
     test_stack();
     test_limits();
     test_usage_limit();
+    test_usage_overflow();
     test_collections_and_delimiters();
     test_values();
     test_classify();

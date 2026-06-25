@@ -149,30 +149,47 @@ static int hidp_local_usage(hidp_parser_t *p, const hidp_item_t *item)
     return status;
 }
 
+static int hidp_clamp_usage_max(hidp_parser_t *p, uint32_t *hi)
+{
+    uint32_t index = (uint32_t)p->local_usages;
+    int status;
+
+    if ((uint32_t)(*hi - p->usage_min + index) < HIDP_MAX_USAGES)
+        return HIDP_OK;
+    if ((p->flags & HIDP_PARSE_STRICT) && p->usage_min > *hi)
+        return HIDP_ERR_VALUE;
+    status = hidp_warn(p, HIDP_ERR_USAGES);
+    if (status != HIDP_OK)
+        return status;
+    *hi = HIDP_MAX_USAGES - index + p->usage_min - 1u;
+    if (*hi == 0u)
+        return hidp_recover(p, HIDP_ERR_USAGES);
+    return HIDP_OK;
+}
+
 static int hidp_local_usage_max(hidp_parser_t *p, const hidp_item_t *item)
 {
     uint32_t hi = item->udata;
-    uint32_t count = hi - p->usage_min;
+    uint64_t count;
     int status;
 
     if ((p->flags & HIDP_PARSE_STRICT) && !p->have_usage_min)
         return HIDP_ERR_VALUE;
-    if (p->usage_min > hi) {
-        p->have_usage_min = 0;
-        return HIDP_OK;
-    }
-    if (count + p->local_usages >= HIDP_MAX_USAGES) {
-        status = hidp_warn(p, HIDP_ERR_USAGES);
-        if (status != HIDP_OK)
-            return status;
-        hi = (uint32_t)(HIDP_MAX_USAGES - p->local_usages) + p->usage_min - 1u;
-        if (hi == 0u)
-            return hidp_recover(p, HIDP_ERR_USAGES);
-    }
     p->have_usage_min = 0;
+    status = hidp_clamp_usage_max(p, &hi);
+    if (status != HIDP_OK || p->usage_min > hi)
+        return status;
+    count = (uint64_t)hi - p->usage_min + 1u;
+    if (count > HIDP_MAX_USAGES - p->local_usages) {
+        status = hidp_recover(p, HIDP_ERR_USAGES);
+        if (status != HIDP_OK || p->local_usages == HIDP_MAX_USAGES)
+            return status;
+        hi = p->usage_min + (uint32_t)(HIDP_MAX_USAGES - p->local_usages) - 1u;
+        count = (uint64_t)hi - p->usage_min + 1u;
+    }
     status = hidp_add_usages(p, p->usage_min, hi, item->data_len);
     if (status == HIDP_OK)
-        p->local_usages += (size_t)(hi - p->usage_min) + 1u;
+        p->local_usages += (size_t)count;
     return status;
 }
 
@@ -561,8 +578,8 @@ static int hidp_parse_all(hidp_parser_t *p, const unsigned char *data, size_t da
     if (status != HIDP_OK)
         return status;
     p->offset = data_len;
-    hidp_reset_locals(p);
     status = hidp_parse_end(p);
+    hidp_reset_locals(p);
     if (status == HIDP_OK)
         hidp_finish(p);
     return status;

@@ -156,15 +156,14 @@ static int hidp_clamp_usage_max(hidp_parser_t *p, uint32_t *hi)
 
     if ((uint32_t)(*hi - p->usage_min + index) < HIDP_MAX_USAGES)
         return HIDP_OK;
-    if ((p->flags & HIDP_PARSE_STRICT) && p->usage_min > *hi)
-        return HIDP_ERR_VALUE;
     status = hidp_warn(p, HIDP_ERR_USAGES);
     if (status != HIDP_OK)
         return status;
     *hi = HIDP_MAX_USAGES - index + p->usage_min - 1u;
-    if (*hi == 0u)
-        return hidp_recover(p, HIDP_ERR_USAGES);
-    return HIDP_OK;
+    if (*hi != 0u)
+        return HIDP_OK;
+    status = hidp_recover(p, HIDP_ERR_USAGES);
+    return status != HIDP_OK ? status : -1;
 }
 
 static int hidp_local_usage_max(hidp_parser_t *p, const hidp_item_t *item)
@@ -173,10 +172,12 @@ static int hidp_local_usage_max(hidp_parser_t *p, const hidp_item_t *item)
     uint64_t count;
     int status;
 
-    if ((p->flags & HIDP_PARSE_STRICT) && !p->have_usage_min)
+    if ((p->flags & HIDP_PARSE_STRICT) && (!p->have_usage_min || p->usage_min > hi))
         return HIDP_ERR_VALUE;
     p->have_usage_min = 0;
     status = hidp_clamp_usage_max(p, &hi);
+    if (status < 0)
+        return HIDP_OK;
     if (status != HIDP_OK || p->usage_min > hi)
         return status;
     count = (uint64_t)hi - p->usage_min + 1u;
@@ -549,6 +550,8 @@ static int hidp_parse_end(hidp_parser_t *p)
         status = hidp_recover(p, HIDP_ERR_COLLECTION);
     if (status == HIDP_OK && p->delimiter_depth > 0u)
         status = hidp_recover(p, HIDP_ERR_DELIMITER);
+    if (status == HIDP_OK && (p->flags & HIDP_PARSE_STRICT) && p->have_usage_min)
+        status = HIDP_ERR_VALUE;
     if (status == HIDP_OK && (p->flags & HIDP_PARSE_STRICT) && p->saw_id && p->saw_no_id)
         status = HIDP_ERR_VALUE;
     return status;

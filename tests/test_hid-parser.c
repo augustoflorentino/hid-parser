@@ -298,6 +298,15 @@ static void test_usage_overflow(void)
     };
     static const unsigned char max_below_min[] = {0x05, 0x09, 0x19, 0x05, 0x29, 0x03, 0x15, 0x00,
                                                   0x25, 0x01, 0x75, 0x01, 0x95, 0x01, 0x81, 0x02};
+    static const unsigned char after_usages[] = {0x05, 0x09, 0x09, 0x01, 0x09, 0x02, 0x19, 0x05,
+                                                 0x29, 0x03, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01,
+                                                 0x95, 0x01, 0x81, 0x02};
+    static const unsigned char no_index_left[] = {
+        0x05, 0x09, 0x19, 0x01, 0x2a, 0xff, 0x2f, 0x19, 0x00, 0x29, 0x05,
+        0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x01, 0x81, 0x02,
+    };
+    static const unsigned char open_min[] = {0x09, 0x30, 0x19, 0x01, 0x29, 0x02, 0x75, 0x01,
+                                             0x95, 0x01, 0x81, 0x02, 0x19, 0x01};
     const hidp_field_t *f;
     hidp_desc_t *d;
 
@@ -312,6 +321,17 @@ static void test_usage_overflow(void)
     CHECK(usage_at(f, 12287) == 0x00093004);
     hidp_desc_destroy(d);
     CHECK(PARSE(max_below_min, HIDP_PARSE_STRICT, &d) == HIDP_ERR_VALUE);
+    CHECK(PARSE(after_usages, 0, &d) == HIDP_OK);
+    CHECK(hidp_desc_field(d, 0)->usage_count == 2);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(after_usages, HIDP_PARSE_STRICT, &d) == HIDP_ERR_VALUE);
+    CHECK(PARSE(no_index_left, 0, &d) == HIDP_ERR_USAGES);
+    CHECK(PARSE(no_index_left, HIDP_PARSE_TOLERANT, &d) == HIDP_OK);
+    CHECK(hidp_desc_field(d, 0)->usage_count == 12287);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(open_min, 0, &d) == HIDP_OK);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(open_min, HIDP_PARSE_STRICT, &d) == HIDP_ERR_VALUE);
 }
 
 static void test_collections_and_delimiters(void)

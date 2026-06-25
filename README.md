@@ -94,13 +94,17 @@ Conventions:
   `malloc`/`free`
 - usages are 32-bit extended values, usage page in the high 16 bits
 - `bit_offset` counts from the start of the report, report ID byte included
+- a parsed descriptor is never modified, so any number of threads may read it at once; the
+  library has no global state
 
 ## Rules
 
 The default mode does what `drivers/hid/hid-core.c` does:
 
 - short usages take the usage page that is current at the main item, walking back until one
-  already has it; Usage Minimum/Maximum expand at the maximum, capped at 12288 usages
+  already has it; Usage Minimum/Maximum expand at the maximum, capped at 12288 usages with the
+  same 32-bit arithmetic as the kernel, so a maximum below the minimum fills the table from the
+  minimum on
 - Logical and Physical Maximum are read as signed only when the minimum is negative
 - a 4-bit Unit Exponent is sign-extended
 - report ID is a global item and follows Push/Pop; the global stack holds 4 entries
@@ -114,8 +118,9 @@ The default mode does what `drivers/hid/hid-core.c` does:
 Unlike the kernel, padding fields without usages are kept, so every bit of a report belongs to
 a field.
 
-`HIDP_PARSE_STRICT` also rejects Usage Maximum without Usage Minimum, a maximum that only fits
-when read as signed, and a descriptor that mixes reports with and without ID.
+`HIDP_PARSE_STRICT` also rejects Usage Maximum without Usage Minimum or below it, a Usage
+Minimum left without its maximum, a maximum that only fits when read as signed, and a
+descriptor that mixes reports with and without ID.
 
 `HIDP_PARSE_TOLERANT` turns the recoverable errors into warnings: it skips long and unknown
 items, accepts report sizes and counts up to 65535, ignores bad report IDs and logical ranges,
@@ -128,7 +133,11 @@ allows 64 nested Push and closes what is left open.
   `scripts/fetch-corpus.sh` gathers the descriptors of the Linux and hid-tools test suites
   (GPL, so they stay out of this repository). All of them match, apart from one documented
   hid-tools difference: it ignores Usage Maximum without Usage Minimum
+- `tests/kernel-oracle`: compares every field with the dump of the kernel parser
+  (`/sys/kernel/debug/hid/*/rdesc`); `vm/run-vm.sh` boots a stock kernel in QEMU and feeds the
+  descriptors through uhid, so no debugfs is needed on the host
 - `fuzz/fuzz_parse.c`: parses in the three modes and reads and writes every field
+- tests also pass on 32-bit x86 and on Windows (mingw)
 
 ## Versioning
 

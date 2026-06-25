@@ -57,6 +57,11 @@ if(HID_PARSER_BUILD_TESTS)
     target_link_libraries(hiddump_test PRIVATE hid-parser)
     add_test(NAME corpus COMMAND ${CMAKE_COMMAND} -DDUMP=$<TARGET_FILE:hiddump_test>
         -DCORPUS=${PROJECT_SOURCE_DIR}/tests/corpus -P ${PROJECT_SOURCE_DIR}/tests/corpus/check.cmake)
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_FOUND)
+        add_test(NAME kernel_oracle COMMAND sh ${PROJECT_SOURCE_DIR}/tests/kernel-oracle/run.sh
+            $<TARGET_FILE:hiddump_test>)
+    endif()
     add_library(hid-parser_header_check OBJECT tests/header_check.c)
     target_include_directories(hid-parser_header_check PRIVATE include)
 endif()

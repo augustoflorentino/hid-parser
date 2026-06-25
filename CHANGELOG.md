@@ -4,6 +4,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+- the private copy of bitspan is now 3.1.0
+
 ## 0.1.0 - 2026-06-25
 
 First release.

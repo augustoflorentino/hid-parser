@@ -87,3 +87,8 @@ int hidp_usage_format(uint32_t usage, char *buf, size_t buf_len)
         n = snprintf(buf, buf_len, "0x%08lx", (unsigned long)usage);
     return n >= 0 && (size_t)n < buf_len ? HIDP_OK : HIDP_ERR_BOUNDS;
 }
+
+int hidp_version(void)
+{
+    return HIDP_VERSION;
+}

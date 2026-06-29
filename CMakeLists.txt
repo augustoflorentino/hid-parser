@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
-project(hid-parser VERSION 0.1.0 DESCRIPTION "Parse HID report descriptors and read or build HID reports" LANGUAGES C)
+file(STRINGS include/hid-parser/hid-parser.h HIDP_VERSION_LINES REGEX "^#define HIDP_VERSION_(MAJOR|MINOR|PATCH) ")
+string(REGEX REPLACE ".*MAJOR ([0-9]+).*MINOR ([0-9]+).*PATCH ([0-9]+).*" "\\1.\\2.\\3" HIDP_HEADER_VERSION "${HIDP_VERSION_LINES}")
+project(hid-parser VERSION ${HIDP_HEADER_VERSION} DESCRIPTION "Parse HID report descriptors and read or build HID reports" LANGUAGES C)
 
 option(HID_PARSER_BUILD_TESTS "Build tests" OFF)
 option(HID_PARSER_BUILD_EXAMPLES "Build examples" OFF)

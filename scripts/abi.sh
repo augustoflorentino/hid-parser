@@ -8,7 +8,7 @@ lib=$2
 root=$(cd "$(dirname "$0")/.." && pwd)
 baseline=$root/abi/hid-parser.abi
 
-major=$(sed -n 's/^project(hid-parser VERSION \([0-9]*\)\..*/\1/p' "$root/CMakeLists.txt")
+major=$(sed -n 's/^#define HIDP_VERSION_MAJOR \([0-9]*\)$/\1/p' "$root/include/hid-parser/hid-parser.h")
 soname=$(readelf -d "$lib" | sed -n 's/.*Library soname: \[\(.*\)\]/\1/p')
 if [ "$soname" != "libhid-parser.so.$major" ]; then
     echo "soname $soname does not match major version $major" >&2

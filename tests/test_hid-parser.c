@@ -516,6 +516,7 @@ static void test_alloc_failure(void)
 
 int main(void)
 {
+    CHECK(hidp_version() == HIDP_VERSION);
     test_tokenize();
     test_mouse();
     test_report_ids();

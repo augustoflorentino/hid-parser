@@ -22,6 +22,11 @@
 extern "C" {
 #endif
 
+#define HIDP_VERSION_MAJOR 0
+#define HIDP_VERSION_MINOR 1
+#define HIDP_VERSION_PATCH 0
+#define HIDP_VERSION (HIDP_VERSION_MAJOR * 10000 + HIDP_VERSION_MINOR * 100 + HIDP_VERSION_PATCH)
+
 #define HIDP_OK 0
 #define HIDP_ERR_ARG 1
 #define HIDP_ERR_NOMEM 2
@@ -236,6 +241,7 @@ HIDP_API unsigned hidp_usage_role(uint32_t usage);
 
 HIDP_API const char *hidp_item_name(unsigned type, unsigned tag);
 HIDP_API const char *hidp_strerror(int status);
+HIDP_API int hidp_version(void);
 
 #ifdef __cplusplus
 }

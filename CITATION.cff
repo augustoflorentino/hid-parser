@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "To cite hid-parser, use the metadata in this file."
+type: software
+title: hid-parser
+abstract: "C library that parses USB HID report descriptors and reads and builds HID reports, by the Linux kernel rules"
+authors:
+  - family-names: Florentino
+    given-names: Augusto
+license: MIT
+repository-code: "https://github.com/augustoflorentino/hid-parser"
+keywords:
+  - c
+  - c99
+  - library
+  - hid
+  - usb
+  - usb-hid
+  - report-descriptor
+  - parser

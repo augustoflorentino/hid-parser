@@ -64,13 +64,26 @@ const hidp_report_t *hidp_desc_find_report(const hidp_desc_t *desc, unsigned typ
     return NULL;
 }
 
+static int hidp_type_numbered(const hidp_desc_t *desc, unsigned type)
+{
+    const hidp_report_t *r;
+    size_t i;
+
+    for (i = 0; i < hidp_desc_report_count(desc); i++) {
+        r = hidp_desc_report(desc, i);
+        if (r->type == type && r->id != 0u)
+            return 1;
+    }
+    return 0;
+}
+
 const hidp_report_t *hidp_desc_match_report(const hidp_desc_t *desc, unsigned type,
                                             const unsigned char *report, size_t report_len)
 {
-    const hidp_report_t *r = hidp_desc_find_report(desc, type, 0u);
-
-    if (r != NULL || report == NULL || report_len == 0u)
-        return r;
+    if (!hidp_type_numbered(desc, type))
+        return hidp_desc_find_report(desc, type, 0u);
+    if (report == NULL || report_len == 0u)
+        return NULL;
     return hidp_desc_find_report(desc, type, report[0]);
 }
 
@@ -188,6 +201,8 @@ static int hidp_decode_field(const hidp_field_t *f, size_t field_index,
     hidp_value_t v;
     int status;
 
+    if (f->report_size == 0u || f->report_size > 32u)
+        return HIDP_OK;
     v.field = f;
     v.field_index = field_index;
     for (v.index = 0; v.index < f->report_count; v.index++) {

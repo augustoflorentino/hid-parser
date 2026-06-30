@@ -8,6 +8,9 @@ Each release lists what changed, what updating means for existing code, and ever
   usage and value of each variable control and the usages present in array fields; usage ID
   0, reserved on every page, means "no control" in an array and is skipped
 - `hiddump --report` uses it
+- `hidp_desc_match_report` on a descriptor that mixes reports with and without ID now does
+  what the kernel does: once any report of that type has an ID, the first byte selects the
+  report. It used to pick the report without ID, longer than what was received
 - `hidp_desc_find_usage` looks the usage up range by range instead of usage by usage: on a
   field of 12288 buttons it went from quadratic to linear in the number of ranges
 

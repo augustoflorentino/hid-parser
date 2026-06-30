@@ -150,6 +150,9 @@ static void test_report_ids(void)
         0x85, 0x02, 0x09, 0x32, 0x75, 0x04, 0x91, 0x02, 0xc0,
     };
     static const unsigned char in5[] = {5, 0x34, 0x12};
+    static const unsigned char mixed[] = {0x09, 0x30, 0x75, 0x10, 0x95, 0x01, 0x81, 0x02,
+                                          0x85, 0x03, 0x09, 0x31, 0x75, 0x08, 0x81, 0x02};
+    static const unsigned char in3[] = {3, 0x7f};
     const hidp_report_t *r;
     hidp_desc_t *d;
 
@@ -165,6 +168,10 @@ static void test_report_ids(void)
     CHECK(hidp_desc_find_report(d, HIDP_FEATURE, 2) == NULL);
     CHECK(hidp_desc_match_report(d, HIDP_INPUT, in5, sizeof(in5)) == hidp_desc_find_report(d, HIDP_INPUT, 5));
     CHECK(hidp_desc_match_report(d, HIDP_INPUT, in5, 0) == NULL);
+    hidp_desc_destroy(d);
+    CHECK(PARSE(mixed, 0, &d) == HIDP_OK);
+    CHECK(hidp_desc_match_report(d, HIDP_INPUT, in3, sizeof(in3)) == hidp_desc_find_report(d, HIDP_INPUT, 3));
+    CHECK(hidp_desc_match_report(d, HIDP_INPUT, in3, 0) == NULL);
     hidp_desc_destroy(d);
 }
 
@@ -539,6 +546,10 @@ static void test_decode(void)
         0x19, 0x00, 0x29, 0x65, 0x25, 0x65, 0x75, 0x08, 0x95, 0x03, 0x81, 0x00, 0xc0,
     };
     static const unsigned char report[] = {0x02, 0x02, 0x04, 0x00, 0x05};
+    static const unsigned char wide[] = {0x06, 0x00, 0xff, 0x09, 0x01, 0x75, 0x40, 0x95, 0x01,
+                                         0x81, 0x02, 0x09, 0x02, 0x75, 0x08, 0x81, 0x02, 0x09,
+                                         0x03, 0x75, 0x00, 0x81, 0x02};
+    static const unsigned char wide_report[] = {1, 2, 3, 4, 5, 6, 7, 8, 7};
     decoded_t d = {{0}, {0}, 0, 0};
     hidp_desc_t *desc;
 
@@ -556,6 +567,13 @@ static void test_decode(void)
     CHECK(hidp_report_decode(desc, HIDP_OUTPUT, report, sizeof(report), collect, &d)
           == HIDP_ERR_NOT_FOUND);
     CHECK(hidp_report_decode(desc, HIDP_INPUT, report, sizeof(report), NULL, &d) == HIDP_ERR_ARG);
+    hidp_desc_destroy(desc);
+    CHECK(PARSE(wide, 0, &desc) == HIDP_OK);
+    d.len = 0;
+    d.stop_after = 0;
+    CHECK(hidp_report_decode(desc, HIDP_INPUT, wide_report, sizeof(wide_report), collect, &d)
+          == HIDP_OK);
+    CHECK(d.len == 1 && d.usages[0] == 0xff000002 && d.values[0] == 7);
     hidp_desc_destroy(desc);
 }
 

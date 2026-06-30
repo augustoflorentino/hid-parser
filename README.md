@@ -76,10 +76,11 @@ also writes the report ID) and fill it with `hidp_field_set`.
 
 [`examples/hiddump.c`](examples/hiddump.c) prints a descriptor as an item tree (`--items`), as
 reports and fields, or as one line per value (`--slots`); `--hex` reads hex text instead of
-binary:
+binary, and `--report` decodes one input report given in hex:
 
 ```sh
 hiddump /sys/class/hidraw/hidraw0/device/report_descriptor
+hiddump --report "05 00 fd ff 03 00 01 ff 00 00 00 00 00" mouse.bin
 ```
 
 The header `include/hid-parser/hid-parser.h` is the API reference.

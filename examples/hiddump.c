@@ -170,6 +170,46 @@ static void print_kernel_field(const hidp_field_t *f)
     printf("%s\n", f->usage_count ? "" : "-");
 }
 
+static void print_value(const hidp_field_t *f, size_t i, const unsigned char *report,
+                        size_t len)
+{
+    char name[96];
+    uint32_t usage = 0;
+    int32_t value = 0;
+
+    if (hidp_field_get(f, report, len, i, &value) != HIDP_OK)
+        return;
+    if (f->flags & HIDP_FLAG_VARIABLE) {
+        hidp_field_usage(f, i, &usage);
+        hidp_usage_format(usage, name, sizeof(name));
+        printf("%s = %ld%s\n", name, (long)value, hidp_field_in_range(f, value) ? "" : " (null)");
+    } else if (hidp_field_array_usage(f, value, &usage) == HIDP_OK && value != f->logical_min) {
+        hidp_usage_format(usage, name, sizeof(name));
+        printf("%s\n", name);
+    }
+}
+
+static int decode(const hidp_desc_t *desc, const unsigned char *report, size_t len)
+{
+    const hidp_report_t *r = hidp_desc_match_report(desc, HIDP_INPUT, report, len);
+    const hidp_field_t *f;
+    size_t i;
+    size_t j;
+
+    if (r == NULL || len < r->byte_len) {
+        fprintf(stderr, "no input report of %zu bytes matches\n", len);
+        return 1;
+    }
+    for (i = 0; i < hidp_desc_field_count(desc); i++) {
+        f = hidp_desc_field(desc, i);
+        if (f->report_type != HIDP_INPUT || f->report_id != r->id || (f->flags & HIDP_FLAG_CONSTANT))
+            continue;
+        for (j = 0; j < f->report_count; j++)
+            print_value(f, j, report, len);
+    }
+    return 0;
+}
+
 static void dump(const hidp_desc_t *desc, int slots)
 {
     const hidp_collection_t *c;
@@ -200,12 +240,15 @@ static void dump(const hidp_desc_t *desc, int slots)
                hidp_strerror(hidp_desc_warning(desc, i)->code));
 }
 
-static int parse_args(int argc, char **argv, unsigned *flags, int *slots, const char **path)
+static int parse_args(int argc, char **argv, unsigned *flags, int *slots, const char **path,
+                      char **report)
 {
     int i;
 
     for (i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--strict") == 0)
+        if (strcmp(argv[i], "--report") == 0 && i + 1 < argc)
+            *report = argv[++i];
+        else if (strcmp(argv[i], "--strict") == 0)
             *flags = HIDP_PARSE_STRICT;
         else if (strcmp(argv[i], "--tolerant") == 0)
             *flags = HIDP_PARSE_TOLERANT;
@@ -228,6 +271,7 @@ static int parse_args(int argc, char **argv, unsigned *flags, int *slots, const 
 int main(int argc, char **argv)
 {
     const char *path = NULL;
+    char *report = NULL;
     unsigned flags = 0;
     int slots = 0;
     FILE *in = stdin;
@@ -237,8 +281,9 @@ int main(int argc, char **argv)
     hidp_desc_t *desc = NULL;
     int status;
 
-    if (parse_args(argc, argv, &flags, &slots, &path) != 0) {
-        fprintf(stderr, "usage: hiddump [--strict|--tolerant] [--slots|--fields|--items] [--hex] [descriptor]\n");
+    if (parse_args(argc, argv, &flags, &slots, &path, &report) != 0) {
+        fprintf(stderr, "usage: hiddump [--strict|--tolerant] [--slots|--fields|--items] [--hex] "
+                        "[--report HEX] [descriptor]\n");
         return 2;
     }
     if (path != NULL && (in = fopen(path, "rb")) == NULL) {
@@ -269,7 +314,11 @@ int main(int argc, char **argv)
         fprintf(stderr, "error at byte %zu: %s\n", error_offset, hidp_strerror(status));
         return 1;
     }
-    dump(desc, slots);
+    if (report != NULL)
+        status = decode(desc, (unsigned char *)report,
+                        parse_hex((unsigned char *)report, strlen(report)));
+    else
+        dump(desc, slots);
     hidp_desc_destroy(desc);
-    return 0;
+    return status;
 }

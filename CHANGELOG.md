@@ -7,6 +7,8 @@ Each release lists what changed, what updating means for existing code, and ever
 - the private copy of bitspan is now 3.1.0
 - `HIDP_VERSION_MAJOR`, `HIDP_VERSION_MINOR`, `HIDP_VERSION_PATCH`, `HIDP_VERSION` and
   `hidp_version()`
+- `hiddump --report HEX` decodes an input report: the value of each variable field and the
+  usages present in array fields
 
 ## 0.1.0 - 2026-06-25
 

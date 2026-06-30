@@ -57,6 +57,10 @@ if(HID_PARSER_BUILD_TESTS)
     add_test(NAME usage_names COMMAND test_usage_names)
     add_executable(hiddump_test examples/hiddump.c)
     target_link_libraries(hiddump_test PRIVATE hid-parser)
+    add_test(NAME decode COMMAND hiddump_test --report "05 00 fd ff 03 00 01 ff 00 00 00 00 00"
+        ${PROJECT_SOURCE_DIR}/tests/corpus/g502x-if0.bin)
+    set_tests_properties(decode PROPERTIES PASS_REGULAR_EXPRESSION
+        "Button 1 = 1\nButton 2 = 0\nButton 3 = 1.*X = -3\nY = 3\nWheel = 1\nAC Pan = -1")
     add_test(NAME corpus COMMAND ${CMAKE_COMMAND} -DDUMP=$<TARGET_FILE:hiddump_test>
         -DCORPUS=${PROJECT_SOURCE_DIR}/tests/corpus -P ${PROJECT_SOURCE_DIR}/tests/corpus/check.cmake)
     find_package(Python3 COMPONENTS Interpreter)

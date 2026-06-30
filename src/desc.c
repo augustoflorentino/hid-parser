@@ -233,29 +233,39 @@ int hidp_report_decode(const hidp_desc_t *desc, unsigned type, const unsigned ch
     return HIDP_OK;
 }
 
+static int hidp_field_index_of(const hidp_field_t *f, uint32_t usage, size_t *out_index)
+{
+    size_t base = 0;
+    size_t i;
+
+    for (i = 0; i < f->usages_len && base < f->usage_count; i++) {
+        if (usage >= f->usages[i].min && usage <= f->usages[i].max) {
+            *out_index = base + (size_t)(usage - f->usages[i].min);
+            return *out_index < f->usage_count;
+        }
+        base += (size_t)(f->usages[i].max - f->usages[i].min) + 1u;
+    }
+    return 0;
+}
+
 int hidp_desc_find_usage(const hidp_desc_t *desc, unsigned type, uint32_t usage,
                          size_t start_field, size_t *out_field, size_t *out_index)
 {
     const hidp_field_t *f;
-    uint32_t u;
+    size_t index;
     size_t i;
-    size_t j;
 
     if (desc == NULL)
         return HIDP_ERR_ARG;
     for (i = start_field; i < desc->fields.len; i++) {
         f = hidp_desc_field(desc, i);
-        if (f->report_type != type)
+        if (f->report_type != type || !hidp_field_index_of(f, usage, &index))
             continue;
-        for (j = 0; j < f->usage_count; j++) {
-            if (hidp_field_usage(f, j, &u) != HIDP_OK || u != usage)
-                continue;
-            if (out_field != NULL)
-                *out_field = i;
-            if (out_index != NULL)
-                *out_index = j;
-            return HIDP_OK;
-        }
+        if (out_field != NULL)
+            *out_field = i;
+        if (out_index != NULL)
+            *out_index = index;
+        return HIDP_OK;
     }
     return HIDP_ERR_NOT_FOUND;
 }

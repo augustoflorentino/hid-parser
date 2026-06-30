@@ -4,6 +4,11 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+- `hidp_report_decode`: walk an input, output or feature report through a callback, with the
+  usage and value of each variable control and the usages present in array fields; usage ID
+  0, reserved on every page, means "no control" in an array and is skipped
+- `hiddump --report` uses it
+
 ## 0.2.0 - 2026-06-30
 
 - the private copy of bitspan is now 3.1.0

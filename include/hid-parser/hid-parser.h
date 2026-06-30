@@ -193,6 +193,16 @@ typedef struct hidp_report {
     size_t byte_len;
 } hidp_report_t;
 
+typedef struct hidp_value {
+    const hidp_field_t *field;
+    size_t field_index;
+    size_t index;
+    uint32_t usage;
+    int32_t value;
+} hidp_value_t;
+
+typedef int (*hidp_value_fn)(void *ctx, const hidp_value_t *value);
+
 typedef struct hidp_warning {
     size_t offset;
     int code;
@@ -230,6 +240,8 @@ HIDP_API int hidp_field_set(const hidp_field_t *field, unsigned char *report, si
 HIDP_API int hidp_field_array_usage(const hidp_field_t *field, int32_t value,
                                     uint32_t *out_usage);
 HIDP_API int hidp_field_in_range(const hidp_field_t *field, int32_t value);
+HIDP_API int hidp_report_decode(const hidp_desc_t *desc, unsigned type, const unsigned char *report,
+                                size_t report_len, hidp_value_fn value_fn, void *ctx);
 HIDP_API int hidp_report_init(const hidp_report_t *report, unsigned char *buf, size_t buf_len);
 
 HIDP_API const char *hidp_usage_page_name(uint32_t page);

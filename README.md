@@ -71,6 +71,9 @@ if (hidp_desc_find_usage(desc, HIDP_INPUT, 0x00010030, 0, &field, &index) == HID
 hidp_desc_destroy(desc);
 ```
 
+To read a whole report, `hidp_report_decode` calls you back with the usage and value of each
+variable control and of each usage present in an array.
+
 To send a report, find it with `hidp_desc_find_report`, clear it with `hidp_report_init` (which
 also writes the report ID) and fill it with `hidp_field_set`.
 

@@ -514,9 +514,55 @@ static void test_alloc_failure(void)
     CHECK(n > 5);
 }
 
+typedef struct {
+    uint32_t usages[16];
+    int32_t values[16];
+    size_t len;
+    size_t stop_after;
+} decoded_t;
+
+static int collect(void *ctx, const hidp_value_t *v)
+{
+    decoded_t *d = ctx;
+
+    d->usages[d->len] = v->usage;
+    d->values[d->len] = v->value;
+    d->len++;
+    return d->len == d->stop_after;
+}
+
+static void test_decode(void)
+{
+    static const unsigned char kbd[] = {
+        0x05, 0x01, 0x09, 0x06, 0xa1, 0x01, 0x85, 0x02, 0x05, 0x07, 0x19, 0xe0, 0x29, 0xe1,
+        0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x02, 0x81, 0x02, 0x95, 0x06, 0x81, 0x03,
+        0x19, 0x00, 0x29, 0x65, 0x25, 0x65, 0x75, 0x08, 0x95, 0x03, 0x81, 0x00, 0xc0,
+    };
+    static const unsigned char report[] = {0x02, 0x02, 0x04, 0x00, 0x05};
+    decoded_t d = {{0}, {0}, 0, 0};
+    hidp_desc_t *desc;
+
+    CHECK(PARSE(kbd, 0, &desc) == HIDP_OK);
+    CHECK(hidp_report_decode(desc, HIDP_INPUT, report, sizeof(report), collect, &d) == HIDP_OK);
+    CHECK(d.len == 4);
+    CHECK(d.usages[0] == 0x000700e0 && d.values[0] == 0);
+    CHECK(d.usages[1] == 0x000700e1 && d.values[1] == 1);
+    CHECK(d.usages[2] == 0x00070004 && d.usages[3] == 0x00070005);
+    d.len = 0;
+    d.stop_after = 1;
+    CHECK(hidp_report_decode(desc, HIDP_INPUT, report, sizeof(report), collect, &d)
+          == HIDP_ERR_STOPPED);
+    CHECK(hidp_report_decode(desc, HIDP_INPUT, report, 4, collect, &d) == HIDP_ERR_BOUNDS);
+    CHECK(hidp_report_decode(desc, HIDP_OUTPUT, report, sizeof(report), collect, &d)
+          == HIDP_ERR_NOT_FOUND);
+    CHECK(hidp_report_decode(desc, HIDP_INPUT, report, sizeof(report), NULL, &d) == HIDP_ERR_ARG);
+    hidp_desc_destroy(desc);
+}
+
 int main(void)
 {
     CHECK(hidp_version() == HIDP_VERSION);
+    test_decode();
     test_tokenize();
     test_mouse();
     test_report_ids();

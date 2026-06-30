@@ -170,44 +170,27 @@ static void print_kernel_field(const hidp_field_t *f)
     printf("%s\n", f->usage_count ? "" : "-");
 }
 
-static void print_value(const hidp_field_t *f, size_t i, const unsigned char *report,
-                        size_t len)
+static int print_value(void *ctx, const hidp_value_t *v)
 {
     char name[96];
-    uint32_t usage = 0;
-    int32_t value = 0;
 
-    if (hidp_field_get(f, report, len, i, &value) != HIDP_OK)
-        return;
-    if (f->flags & HIDP_FLAG_VARIABLE) {
-        hidp_field_usage(f, i, &usage);
-        hidp_usage_format(usage, name, sizeof(name));
-        printf("%s = %ld%s\n", name, (long)value, hidp_field_in_range(f, value) ? "" : " (null)");
-    } else if (hidp_field_array_usage(f, value, &usage) == HIDP_OK && value != f->logical_min) {
-        hidp_usage_format(usage, name, sizeof(name));
+    (void)ctx;
+    hidp_usage_format(v->usage, name, sizeof(name));
+    if (!(v->field->flags & HIDP_FLAG_VARIABLE))
         printf("%s\n", name);
-    }
+    else
+        printf("%s = %ld%s\n", name, (long)v->value,
+               hidp_field_in_range(v->field, v->value) ? "" : " (null)");
+    return 0;
 }
 
 static int decode(const hidp_desc_t *desc, const unsigned char *report, size_t len)
 {
-    const hidp_report_t *r = hidp_desc_match_report(desc, HIDP_INPUT, report, len);
-    const hidp_field_t *f;
-    size_t i;
-    size_t j;
+    int status = hidp_report_decode(desc, HIDP_INPUT, report, len, print_value, NULL);
 
-    if (r == NULL || len < r->byte_len) {
-        fprintf(stderr, "no input report of %zu bytes matches\n", len);
-        return 1;
-    }
-    for (i = 0; i < hidp_desc_field_count(desc); i++) {
-        f = hidp_desc_field(desc, i);
-        if (f->report_type != HIDP_INPUT || f->report_id != r->id || (f->flags & HIDP_FLAG_CONSTANT))
-            continue;
-        for (j = 0; j < f->report_count; j++)
-            print_value(f, j, report, len);
-    }
-    return 0;
+    if (status != HIDP_OK)
+        fprintf(stderr, "report of %zu bytes: %s\n", len, hidp_strerror(status));
+    return status != HIDP_OK;
 }
 
 static void dump(const hidp_desc_t *desc, int slots)

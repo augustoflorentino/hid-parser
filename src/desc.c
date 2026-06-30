@@ -181,6 +181,58 @@ int hidp_field_array_usage(const hidp_field_t *field, int32_t value, uint32_t *o
     return hidp_field_usage(field, (uint32_t)value - (uint32_t)field->logical_min, out_usage);
 }
 
+static int hidp_decode_field(const hidp_field_t *f, size_t field_index,
+                             const unsigned char *report, size_t len, hidp_value_fn fn,
+                             void *ctx)
+{
+    hidp_value_t v;
+    int status;
+
+    v.field = f;
+    v.field_index = field_index;
+    for (v.index = 0; v.index < f->report_count; v.index++) {
+        if (hidp_field_get(f, report, len, v.index, &v.value) != HIDP_OK)
+            return HIDP_ERR_BOUNDS;
+        v.usage = 0;
+        if (f->flags & HIDP_FLAG_VARIABLE)
+            hidp_field_usage(f, v.index, &v.usage);
+        else if (hidp_field_array_usage(f, v.value, &v.usage) != HIDP_OK
+                 || (v.usage & 0xffffu) == 0u)
+            continue;
+        status = fn(ctx, &v);
+        if (status != 0)
+            return HIDP_ERR_STOPPED;
+    }
+    return HIDP_OK;
+}
+
+int hidp_report_decode(const hidp_desc_t *desc, unsigned type, const unsigned char *report,
+                       size_t report_len, hidp_value_fn value_fn, void *ctx)
+{
+    const hidp_report_t *r;
+    const hidp_field_t *f;
+    size_t i;
+    int status;
+
+    if (desc == NULL || report == NULL || value_fn == NULL)
+        return HIDP_ERR_ARG;
+    r = hidp_desc_match_report(desc, type, report, report_len);
+    if (r == NULL)
+        return HIDP_ERR_NOT_FOUND;
+    if (report_len < r->byte_len)
+        return HIDP_ERR_BOUNDS;
+    for (i = 0; i < desc->fields.len; i++) {
+        f = hidp_desc_field(desc, i);
+        if (f->report_type != type || f->report_id != r->id || f->usage_count == 0u
+            || (f->flags & HIDP_FLAG_CONSTANT))
+            continue;
+        status = hidp_decode_field(f, i, report, report_len, value_fn, ctx);
+        if (status != HIDP_OK)
+            return status;
+    }
+    return HIDP_OK;
+}
+
 int hidp_desc_find_usage(const hidp_desc_t *desc, unsigned type, uint32_t usage,
                          size_t start_field, size_t *out_field, size_t *out_index)
 {

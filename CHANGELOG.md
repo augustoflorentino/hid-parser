@@ -4,6 +4,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 0.2.0 - 2026-06-30
+
 - the private copy of bitspan is now 3.1.0
 - `HIDP_VERSION_MAJOR`, `HIDP_VERSION_MINOR`, `HIDP_VERSION_PATCH`, `HIDP_VERSION` and
   `hidp_version()`

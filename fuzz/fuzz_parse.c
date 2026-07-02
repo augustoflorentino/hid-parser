@@ -10,6 +10,20 @@ static int count_item(void *ctx, const hidp_item_t *item)
     return 0;
 }
 
+static int check_value(void *ctx, const hidp_value_t *v)
+{
+    size_t found_field;
+    size_t found_index;
+
+    if (v->index >= v->field->report_count)
+        abort();
+    if ((v->field->flags & HIDP_FLAG_VARIABLE)
+        && hidp_desc_find_usage(ctx, v->field->report_type, v->usage, 0, &found_field,
+                                &found_index) != HIDP_OK)
+        abort();
+    return 0;
+}
+
 static void walk_field(const hidp_desc_t *desc, const hidp_field_t *f, const uint8_t *data,
                        size_t size)
 {
@@ -18,6 +32,7 @@ static void walk_field(const hidp_desc_t *desc, const hidp_field_t *f, const uin
     uint32_t usage;
     int32_t value;
     size_t i;
+    int status;
 
     if (r == NULL)
         abort();
@@ -40,6 +55,9 @@ static void walk_field(const hidp_desc_t *desc, const hidp_field_t *f, const uin
             abort();
         hidp_field_array_usage(f, value, &usage);
     }
+    status = hidp_report_decode(desc, r->type, buf, r->byte_len, check_value, (void *)desc);
+    if (status != HIDP_OK && r->id != 0u)
+        abort();
     free(buf);
 }
 

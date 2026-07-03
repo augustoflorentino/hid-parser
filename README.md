@@ -17,6 +17,13 @@ system with a C99 compiler.
 - usage names from the HID Usage Tables 1.7, in their own object file so a static link only
   pulls them in when you call `hidp_usage_name`, `hidp_usage_page_name` or `hidp_usage_format`
 
+## Quick look
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/descriptor-dark.svg">
+  <img src="docs/images/descriptor-light.svg" alt="The 83-byte report descriptor of a mouse from the test corpus, main items highlighted, next to the collections and fields hiddump prints for it" width="900">
+</picture>
+
 ## Build and install
 
 ```sh

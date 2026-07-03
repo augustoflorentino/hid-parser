@@ -637,11 +637,39 @@ static void test_item_write(void)
     CHECK(hidp_item_write(buf, sizeof(buf), HIDP_ITEM_MAIN, 16, 0, &len) == HIDP_ERR_ARG);
 }
 
+static void test_field_read_write(void)
+{
+    static const unsigned char desc[] = {0x06, 0x00, 0xff, 0x09, 0x01, 0x15, 0x00, 0x27, 0xff,
+                                         0xff, 0xff, 0xff, 0x75, 0x20, 0x95, 0x01, 0x81, 0x02,
+                                         0x09, 0x02, 0x16, 0x00, 0x80, 0x26, 0xff, 0x7f, 0x75,
+                                         0x10, 0x81, 0x02};
+    unsigned char report[6] = {0};
+    const hidp_field_t *u32;
+    const hidp_field_t *s16;
+    hidp_desc_t *d;
+    int64_t v;
+
+    CHECK(PARSE(desc, 0, &d) == HIDP_OK);
+    u32 = hidp_desc_field(d, 0);
+    s16 = hidp_desc_field(d, 1);
+    CHECK(hidp_field_write(u32, report, sizeof(report), 0, 0xfffffffe) == HIDP_OK);
+    CHECK(hidp_field_read(u32, report, sizeof(report), 0, &v) == HIDP_OK && v == 0xfffffffe);
+    CHECK(hidp_field_write(u32, report, sizeof(report), 0, -1) == HIDP_ERR_RANGE);
+    CHECK(hidp_field_write(u32, report, sizeof(report), 0, 0x100000000) == HIDP_ERR_RANGE);
+    CHECK(hidp_field_write(s16, report, sizeof(report), 0, -32768) == HIDP_OK);
+    CHECK(hidp_field_read(s16, report, sizeof(report), 0, &v) == HIDP_OK && v == -32768);
+    CHECK(hidp_field_write(s16, report, sizeof(report), 0, 32768) == HIDP_ERR_RANGE);
+    CHECK(hidp_field_read(s16, report, 3, 0, &v) == HIDP_ERR_BOUNDS);
+    CHECK(hidp_field_read(NULL, report, sizeof(report), 0, &v) == HIDP_ERR_ARG);
+    hidp_desc_destroy(d);
+}
+
 int main(void)
 {
     CHECK(hidp_version() == HIDP_VERSION);
     test_decode();
     test_item_write();
+    test_field_read_write();
     test_tokenize();
     test_mouse();
     test_report_ids();

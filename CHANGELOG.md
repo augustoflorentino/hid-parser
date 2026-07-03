@@ -6,6 +6,14 @@ Each release lists what changed, what updating means for existing code, and ever
 
 - `hidp_item_write`: encode one short item in the smallest size that holds its value; signed
   globals get the size that keeps their sign, so a Logical Maximum of 255 takes two bytes
+- `hidp_field_read` and `hidp_field_write` take the value as `int64_t`. `hidp_field_get`
+  returned an unsigned 32-bit field above `INT32_MAX` as a negative number, and
+  `hidp_field_set` could not tell a negative value from a large unsigned one
+
+### Deprecated
+
+- `hidp_field_get` and `hidp_field_set`: use `hidp_field_read` and `hidp_field_write`. They
+  stay in 1.x and go away in 2.0
 
 ## 1.0.0 - 2026-07-03
 

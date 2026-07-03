@@ -10,8 +10,8 @@ system with a C99 compiler.
 - three modes: kernel rules (default), `HIDP_PARSE_STRICT` and `HIDP_PARSE_TOLERANT`, which
   keeps going on the broken descriptors of real devices and records each problem as a warning
   with its byte offset
-- values: read and write any field of up to 32 bits, signed when the logical minimum is
-  negative; map array values to usages; check null state with `hidp_field_in_range`
+- values: read and write any field of up to 32 bits as `int64_t`, signed when the logical
+  minimum is negative, so unsigned 32-bit fields keep their whole range; map array values to usages; check null state with `hidp_field_in_range`
 - classification of devices (`hidp_desc_kind`) and usages (`hidp_usage_role`: button, axis,
   hat, key, LED, haptic)
 - usage names from the HID Usage Tables 1.7, in their own object file so a static link only
@@ -70,11 +70,11 @@ if (status != HIDP_OK) {
 }
 
 size_t field, index;
-int32_t x;
+int64_t x;
 
 if (hidp_desc_find_usage(desc, HIDP_INPUT, 0x00010030, 0, &field, &index) == HIDP_OK
-    && hidp_field_get(hidp_desc_field(desc, field), report, report_len, index, &x) == HIDP_OK)
-    printf("X = %d\n", x);
+    && hidp_field_read(hidp_desc_field(desc, field), report, report_len, index, &x) == HIDP_OK)
+    printf("X = %lld\n", (long long)x);
 hidp_desc_destroy(desc);
 ```
 
@@ -86,7 +86,7 @@ To build a descriptor, `hidp_item_write` encodes one short item in the smallest 
 keeps its value, reading Logical/Physical Minimum and Maximum and Unit Exponent as signed.
 
 To send a report, find it with `hidp_desc_find_report`, clear it with `hidp_report_init` (which
-also writes the report ID) and fill it with `hidp_field_set`.
+also writes the report ID) and fill it with `hidp_field_write`.
 
 [`examples/hiddump.c`](examples/hiddump.c) prints a descriptor as an item tree (`--items`), as
 reports and fields, or as one line per value (`--slots`); `--hex` reads hex text instead of

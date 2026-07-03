@@ -4,6 +4,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 1.0.0 - 2026-07-03
+
 The API is now stable: see Versioning in the README. The soname is `libhid-parser.so.1`.
 
 - `hidp_desc_parse` takes its mode and allocator in a `hidp_parse_options_t` instead of four

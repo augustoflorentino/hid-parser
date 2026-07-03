@@ -8,6 +8,7 @@ The API is now stable: see Versioning in the README. The soname is `libhid-parse
 
 - `hidp_desc_parse` takes its mode and allocator in a `hidp_parse_options_t` instead of four
   loose arguments, so a call that only wants the defaults passes `NULL`
+- the header is checked to build as C++ with `-Wconversion -Wold-style-cast`
 
 ### Upgrading
 

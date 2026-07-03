@@ -588,10 +588,60 @@ static void test_decode(void)
     hidp_desc_destroy(desc);
 }
 
+static int last_item(void *ctx, const hidp_item_t *item)
+{
+    *(hidp_item_t *)ctx = *item;
+    return 0;
+}
+
+static void check_write(unsigned type, unsigned tag, int64_t value, size_t want_len)
+{
+    unsigned char buf[5];
+    hidp_item_t item;
+    size_t len = 0;
+
+    CHECK(hidp_item_write(buf, sizeof(buf), type, tag, value, &len) == HIDP_OK);
+    CHECK(len == want_len);
+    CHECK(hidp_tokenize(buf, len, last_item, &item, NULL) == HIDP_OK);
+    CHECK(item.type == type && item.tag == tag && item.len == len);
+    if (value < 0)
+        CHECK(item.sdata == value);
+    else
+        CHECK(item.udata == (uint32_t)value);
+}
+
+static void test_item_write(void)
+{
+    unsigned char buf[5];
+    size_t len;
+
+    check_write(HIDP_ITEM_MAIN, HIDP_MAIN_END_COLLECTION, 0, 1);
+    check_write(HIDP_ITEM_MAIN, HIDP_MAIN_INPUT, 2, 2);
+    check_write(HIDP_ITEM_LOCAL, HIDP_LOCAL_USAGE, 0x30, 2);
+    check_write(HIDP_ITEM_LOCAL, HIDP_LOCAL_USAGE, 0x238, 3);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_USAGE_PAGE, 0xff00, 3);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_LOGICAL_MIN, -127, 2);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_LOGICAL_MAX, 127, 2);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_LOGICAL_MAX, 255, 3);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_LOGICAL_MIN, -32768, 3);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_LOGICAL_MAX, 32768, 5);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_LOGICAL_MAX, 0xffffffff, 5);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_REPORT_COUNT, 255, 2);
+    check_write(HIDP_ITEM_GLOBAL, HIDP_GLOBAL_REPORT_COUNT, 256, 3);
+    CHECK(hidp_item_write(buf, sizeof(buf), HIDP_ITEM_GLOBAL, HIDP_GLOBAL_REPORT_COUNT, -1, &len)
+          == HIDP_ERR_RANGE);
+    CHECK(hidp_item_write(buf, sizeof(buf), HIDP_ITEM_GLOBAL, HIDP_GLOBAL_LOGICAL_MIN,
+                          (int64_t)INT32_MIN - 1, &len) == HIDP_ERR_RANGE);
+    CHECK(hidp_item_write(buf, 2, HIDP_ITEM_LOCAL, HIDP_LOCAL_USAGE, 0x238, &len) == HIDP_ERR_BOUNDS);
+    CHECK(hidp_item_write(buf, sizeof(buf), HIDP_ITEM_LONG, 0, 0, &len) == HIDP_ERR_ARG);
+    CHECK(hidp_item_write(buf, sizeof(buf), HIDP_ITEM_MAIN, 16, 0, &len) == HIDP_ERR_ARG);
+}
+
 int main(void)
 {
     CHECK(hidp_version() == HIDP_VERSION);
     test_decode();
+    test_item_write();
     test_tokenize();
     test_mouse();
     test_report_ids();

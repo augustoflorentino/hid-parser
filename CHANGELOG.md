@@ -4,6 +4,9 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+- `hidp_item_write`: encode one short item in the smallest size that holds its value; signed
+  globals get the size that keeps their sign, so a Logical Maximum of 255 takes two bytes
+
 ## 1.0.0 - 2026-07-03
 
 The API is now stable: see Versioning in the README. The soname is `libhid-parser.so.1`.

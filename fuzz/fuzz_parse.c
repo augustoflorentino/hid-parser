@@ -3,10 +3,30 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int same_item(void *ctx, const hidp_item_t *item)
+{
+    const hidp_item_t *want = ctx;
+
+    if (item->type != want->type || item->tag != want->tag || item->udata != want->udata)
+        abort();
+    return 0;
+}
+
 static int count_item(void *ctx, const hidp_item_t *item)
 {
-    (void)item;
+    unsigned char buf[5];
+    size_t len;
+    int64_t value = item->udata;
+
     (*(size_t *)ctx)++;
+    if (item->type > HIDP_ITEM_LOCAL)
+        return 0;
+    if (hidp_item_write(buf, sizeof(buf), item->type, item->tag, value, &len) == HIDP_OK)
+        hidp_tokenize(buf, len, same_item, (void *)item, NULL);
+    else if (item->type == HIDP_ITEM_GLOBAL && item->sdata < 0
+             && hidp_item_write(buf, sizeof(buf), item->type, item->tag, item->sdata, &len)
+                    == HIDP_OK)
+        hidp_tokenize(buf, len, same_item, (void *)item, NULL);
     return 0;
 }
 

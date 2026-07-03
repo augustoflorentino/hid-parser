@@ -82,6 +82,9 @@ To read a whole report, `hidp_report_decode` calls you back with the usage and v
 variable control and of each usage present in an array; fields wider than 32 bits are left
 out.
 
+To build a descriptor, `hidp_item_write` encodes one short item in the smallest size that
+keeps its value, reading Logical/Physical Minimum and Maximum and Unit Exponent as signed.
+
 To send a report, find it with `hidp_desc_find_report`, clear it with `hidp_report_init` (which
 also writes the report ID) and fill it with `hidp_field_set`.
 

@@ -70,3 +70,61 @@ int hidp_tokenize(const unsigned char *desc, size_t desc_len, hidp_item_fn item_
     }
     return HIDP_OK;
 }
+
+static unsigned hidp_value_size(int64_t value)
+{
+    if (value == 0)
+        return 0u;
+    if (value >= -128 && value <= 255)
+        return 1u;
+    if (value >= -32768 && value <= 65535)
+        return 2u;
+    return 4u;
+}
+
+static int hidp_value_fits(int64_t value, unsigned size)
+{
+    if (size == 1u)
+        return value >= -128 && value <= 127;
+    if (size == 2u)
+        return value >= -32768 && value <= 32767;
+    return value >= INT32_MIN && value <= INT32_MAX;
+}
+
+static unsigned hidp_signed_size(int64_t value)
+{
+    unsigned size = hidp_value_size(value);
+
+    while (size > 0u && size < 4u && !hidp_value_fits(value, size))
+        size *= 2u;
+    return size;
+}
+
+static int hidp_tag_signed(unsigned type, unsigned tag)
+{
+    return type == HIDP_ITEM_GLOBAL
+           && (tag == HIDP_GLOBAL_LOGICAL_MIN || tag == HIDP_GLOBAL_LOGICAL_MAX
+               || tag == HIDP_GLOBAL_PHYSICAL_MIN || tag == HIDP_GLOBAL_PHYSICAL_MAX
+               || tag == HIDP_GLOBAL_UNIT_EXPONENT);
+}
+
+int hidp_item_write(unsigned char *buf, size_t buf_len, unsigned type, unsigned tag,
+                    int64_t value, size_t *out_len)
+{
+    unsigned size;
+    unsigned i;
+
+    if (buf == NULL || out_len == NULL || type > HIDP_ITEM_LOCAL || tag > 15u)
+        return HIDP_ERR_ARG;
+    if (value < INT32_MIN || value > (int64_t)UINT32_MAX
+        || (value < 0 && !hidp_tag_signed(type, tag)))
+        return HIDP_ERR_RANGE;
+    size = hidp_tag_signed(type, tag) ? hidp_signed_size(value) : hidp_value_size(value);
+    if (buf_len < 1u + size)
+        return HIDP_ERR_BOUNDS;
+    buf[0] = (unsigned char)(tag << 4 | type << 2 | (size == 4u ? 3u : size));
+    for (i = 0; i < size; i++)
+        buf[1u + i] = (unsigned char)((uint64_t)value >> (8u * i));
+    *out_len = 1u + size;
+    return HIDP_OK;
+}

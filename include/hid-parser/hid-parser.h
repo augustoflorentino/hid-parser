@@ -218,6 +218,8 @@ typedef struct hidp_warning {
 HIDP_API int hidp_tokenize(const unsigned char *desc, size_t desc_len, hidp_item_fn item_fn,
                            void *item_ctx, size_t *out_error_offset);
 
+HIDP_API int hidp_item_write(unsigned char *buf, size_t buf_len, unsigned type, unsigned tag,
+                             int64_t value, size_t *out_len);
 HIDP_API int hidp_desc_parse(const unsigned char *desc, size_t desc_len,
                              const hidp_parse_options_t *options, hidp_desc_t **out_desc,
                              size_t *out_error_offset);

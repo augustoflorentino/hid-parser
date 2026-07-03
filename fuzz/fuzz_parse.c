@@ -64,9 +64,11 @@ static void walk_field(const hidp_desc_t *desc, const hidp_field_t *f, const uin
 static void parse(const uint8_t *data, size_t size, unsigned flags)
 {
     hidp_desc_t *desc = NULL;
+    hidp_parse_options_t options = {0, NULL, NULL, NULL};
     size_t i;
 
-    if (hidp_desc_parse(data, size, flags, NULL, NULL, NULL, &desc, NULL) != HIDP_OK)
+    options.flags = flags;
+    if (hidp_desc_parse(data, size, &options, &desc, NULL) != HIDP_OK)
         return;
     for (i = 0; i < hidp_desc_field_count(desc); i++)
         walk_field(desc, hidp_desc_field(desc, i), data, size);

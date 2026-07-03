@@ -4,6 +4,26 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+The API is now stable: see Versioning in the README. The soname is `libhid-parser.so.1`.
+
+- `hidp_desc_parse` takes its mode and allocator in a `hidp_parse_options_t` instead of four
+  loose arguments, so a call that only wants the defaults passes `NULL`
+
+### Upgrading
+
+```c
+hidp_desc_parse(data, len, flags, alloc_fn, free_fn, ctx, &desc, &err);
+```
+
+becomes
+
+```c
+hidp_parse_options_t options = {flags, alloc_fn, free_fn, ctx};
+hidp_desc_parse(data, len, &options, &desc, &err);
+```
+
+or `hidp_desc_parse(data, len, NULL, &desc, &err)` for the default mode with `malloc`.
+
 ## 0.4.0 - 2026-07-02
 
 - `hidp_report_decode`: walk an input, output or feature report through a callback, with the

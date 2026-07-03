@@ -139,6 +139,13 @@ typedef struct hidp_desc hidp_desc_t;
 typedef void *(*hidp_alloc_fn)(void *ctx, size_t size);
 typedef void (*hidp_free_fn)(void *ctx, void *ptr);
 
+typedef struct hidp_parse_options {
+    unsigned flags;
+    hidp_alloc_fn alloc_fn;
+    hidp_free_fn free_fn;
+    void *alloc_ctx;
+} hidp_parse_options_t;
+
 typedef struct hidp_item {
     size_t offset;
     size_t len;
@@ -211,9 +218,9 @@ typedef struct hidp_warning {
 HIDP_API int hidp_tokenize(const unsigned char *desc, size_t desc_len, hidp_item_fn item_fn,
                            void *item_ctx, size_t *out_error_offset);
 
-HIDP_API int hidp_desc_parse(const unsigned char *desc, size_t desc_len, unsigned flags,
-                             hidp_alloc_fn alloc_fn, hidp_free_fn free_fn, void *alloc_ctx,
-                             hidp_desc_t **out_desc, size_t *out_error_offset);
+HIDP_API int hidp_desc_parse(const unsigned char *desc, size_t desc_len,
+                             const hidp_parse_options_t *options, hidp_desc_t **out_desc,
+                             size_t *out_error_offset);
 HIDP_API void hidp_desc_destroy(hidp_desc_t *desc);
 
 HIDP_API size_t hidp_desc_field_count(const hidp_desc_t *desc);

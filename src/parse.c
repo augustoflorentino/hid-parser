@@ -608,22 +608,25 @@ static int hidp_desc_new(hidp_alloc_fn alloc_fn, hidp_free_fn free_fn, void *all
     return HIDP_OK;
 }
 
-int hidp_desc_parse(const unsigned char *data, size_t data_len, unsigned flags,
-                    hidp_alloc_fn alloc_fn, hidp_free_fn free_fn, void *alloc_ctx,
-                    hidp_desc_t **out_desc, size_t *out_error_offset)
+int hidp_desc_parse(const unsigned char *data, size_t data_len,
+                    const hidp_parse_options_t *options, hidp_desc_t **out_desc,
+                    size_t *out_error_offset)
 {
+    static const hidp_parse_options_t defaults = {0, NULL, NULL, NULL};
+    const hidp_parse_options_t *o = options != NULL ? options : &defaults;
+    unsigned flags = o->flags;
     hidp_parser_t p;
     int status;
 
     if (out_desc == NULL || (data == NULL && data_len > 0u)
-        || (alloc_fn == NULL) != (free_fn == NULL)
+        || (o->alloc_fn == NULL) != (o->free_fn == NULL)
         || (flags & ~(HIDP_PARSE_STRICT | HIDP_PARSE_TOLERANT)) != 0u
         || flags == (HIDP_PARSE_STRICT | HIDP_PARSE_TOLERANT))
         return HIDP_ERR_ARG;
     *out_desc = NULL;
     memset(&p, 0, sizeof(p));
     p.flags = flags;
-    status = hidp_desc_new(alloc_fn, free_fn, alloc_ctx, &p.desc);
+    status = hidp_desc_new(o->alloc_fn, o->free_fn, o->alloc_ctx, &p.desc);
     if (status != HIDP_OK)
         return status;
     status = hidp_parse_all(&p, data, data_len);

@@ -13,7 +13,7 @@ int main(void)
     int32_t value = 0;
     int status;
 
-    status = hidp_desc_parse(desc, sizeof(desc), 0, NULL, NULL, NULL, &d, NULL);
+    status = hidp_desc_parse(desc, sizeof(desc), NULL, &d, NULL);
     if (status == HIDP_OK)
         status = hidp_field_get(hidp_desc_field(d, 0), report, sizeof(report), 0, &value);
     if (hidp_strerror(status) == NULL)

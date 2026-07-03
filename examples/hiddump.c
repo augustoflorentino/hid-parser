@@ -262,6 +262,7 @@ int main(int argc, char **argv)
     size_t len = 0;
     size_t error_offset = 0;
     hidp_desc_t *desc = NULL;
+    hidp_parse_options_t options = {0, NULL, NULL, NULL};
     int status;
 
     if (parse_args(argc, argv, &flags, &slots, &path, &report) != 0) {
@@ -291,7 +292,8 @@ int main(int argc, char **argv)
             fprintf(stderr, "error at byte %zu: %s\n", error_offset, hidp_strerror(status));
         return status != HIDP_OK;
     }
-    status = hidp_desc_parse(data, len, flags, NULL, NULL, NULL, &desc, &error_offset);
+    options.flags = flags;
+    status = hidp_desc_parse(data, len, &options, &desc, &error_offset);
     free(data);
     if (status != HIDP_OK) {
         fprintf(stderr, "error at byte %zu: %s\n", error_offset, hidp_strerror(status));

@@ -55,7 +55,7 @@ Define `HIDP_STATIC` as well to keep every function private to that file.
 ```c
 hidp_desc_t *desc;
 size_t err;
-int status = hidp_desc_parse(bytes, len, 0, NULL, NULL, NULL, &desc, &err);
+int status = hidp_desc_parse(bytes, len, NULL, &desc, &err);
 
 if (status != HIDP_OK) {
     fprintf(stderr, "byte %zu: %s\n", err, hidp_strerror(status));
@@ -95,8 +95,9 @@ Conventions:
 - what `hidp_desc_parse` returns is released only by `hidp_desc_destroy`, which accepts `NULL`
 - fields, collections, reports and warnings belong to the descriptor and live until it is
   destroyed
-- pass your own allocator and free function to `hidp_desc_parse`, or both `NULL` for
-  `malloc`/`free`
+- `hidp_desc_parse` takes a `hidp_parse_options_t` with the mode flags and an optional
+  allocator (`alloc_fn` and `free_fn`, both set or both `NULL` for `malloc`/`free`); `NULL`
+  options mean the default mode with `malloc`
 - usages are 32-bit extended values, usage page in the high 16 bits
 - `bit_offset` counts from the start of the report, report ID byte included
 - a parsed descriptor is never modified, so any number of threads may read it at once; the
@@ -146,8 +147,10 @@ allows 64 nested Push and closes what is left open.
 
 ## Versioning
 
-Semantic Versioning. Compatible releases bump the minor version; incompatible ones bump the
-major version and the soname. See [CHANGELOG.md](CHANGELOG.md).
+Semantic Versioning, from 1.0.0 on. Within a major version the API and ABI only grow: nothing
+is removed or changes meaning, and the public structs keep their layout. What is going away is
+marked deprecated in a minor release first. Incompatible releases bump the major version and
+the soname. See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

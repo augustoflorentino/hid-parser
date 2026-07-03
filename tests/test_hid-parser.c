@@ -41,7 +41,10 @@ static int parse_bytes(const unsigned char *bytes, size_t len, unsigned flags,
                        hidp_desc_t **out)
 {
     *out = NULL;
-    return hidp_desc_parse(bytes, len, flags, NULL, NULL, NULL, out, NULL);
+    hidp_parse_options_t o = {0, NULL, NULL, NULL};
+
+    o.flags = flags;
+    return hidp_desc_parse(bytes, len, &o, out, NULL);
 }
 
 static uint32_t usage_at(const hidp_field_t *f, size_t index)
@@ -242,7 +245,7 @@ static void test_stack(void)
     CHECK(hidp_desc_field(d, 0)->report_size == 16 && hidp_desc_field(d, 0)->report_id == 2);
     CHECK(hidp_desc_field(d, 1)->report_size == 8 && hidp_desc_field(d, 1)->report_id == 1);
     hidp_desc_destroy(d);
-    CHECK(hidp_desc_parse(overflow, sizeof(overflow), 0, NULL, NULL, NULL, &d, &err) == HIDP_ERR_STACK);
+    CHECK(hidp_desc_parse(overflow, sizeof(overflow), NULL, &d, &err) == HIDP_ERR_STACK);
     CHECK(err == 4);
     CHECK(PARSE(overflow, HIDP_PARSE_TOLERANT, &d) == HIDP_OK);
     hidp_desc_destroy(d);
@@ -366,7 +369,7 @@ static void test_collections_and_delimiters(void)
     CHECK(PARSE(nested, 0, &d) == HIDP_ERR_DELIMITER);
     CHECK(PARSE(unclosed, 0, &d) == HIDP_OK);
     hidp_desc_destroy(d);
-    CHECK(hidp_desc_parse(trailing, sizeof(trailing), 0, NULL, NULL, NULL, &d, &err)
+    CHECK(hidp_desc_parse(trailing, sizeof(trailing), NULL, &d, &err)
           == HIDP_ERR_DELIMITER);
     CHECK(err == sizeof(trailing));
     CHECK(PARSE(trailing, HIDP_PARSE_TOLERANT, &d) == HIDP_OK);
@@ -478,11 +481,17 @@ static void test_bad_args(void)
     int32_t v;
     int i;
 
-    CHECK(hidp_desc_parse(mouse, sizeof(mouse), 0, NULL, NULL, NULL, NULL, NULL) == HIDP_ERR_ARG);
-    CHECK(hidp_desc_parse(NULL, 1, 0, NULL, NULL, NULL, &d, NULL) == HIDP_ERR_ARG);
-    CHECK(hidp_desc_parse(mouse, sizeof(mouse), 0, failing_alloc, NULL, NULL, &d, NULL) == HIDP_ERR_ARG);
-    CHECK(hidp_desc_parse(mouse, sizeof(mouse), 4, NULL, NULL, NULL, &d, NULL) == HIDP_ERR_ARG);
-    CHECK(hidp_desc_parse(mouse, sizeof(mouse), 3, NULL, NULL, NULL, &d, NULL) == HIDP_ERR_ARG);
+    hidp_parse_options_t o = {0, NULL, NULL, NULL};
+
+    CHECK(hidp_desc_parse(mouse, sizeof(mouse), NULL, NULL, NULL) == HIDP_ERR_ARG);
+    CHECK(hidp_desc_parse(NULL, 1, NULL, &d, NULL) == HIDP_ERR_ARG);
+    o.alloc_fn = failing_alloc;
+    CHECK(hidp_desc_parse(mouse, sizeof(mouse), &o, &d, NULL) == HIDP_ERR_ARG);
+    o.alloc_fn = NULL;
+    o.flags = 4;
+    CHECK(hidp_desc_parse(mouse, sizeof(mouse), &o, &d, NULL) == HIDP_ERR_ARG);
+    o.flags = 3;
+    CHECK(hidp_desc_parse(mouse, sizeof(mouse), &o, &d, NULL) == HIDP_ERR_ARG);
     CHECK(hidp_desc_field_count(NULL) == 0 && hidp_desc_field(NULL, 0) == NULL);
     CHECK(hidp_desc_find_report(NULL, 0, 0) == NULL);
     CHECK(hidp_desc_find_usage(NULL, 0, 0, 0, NULL, NULL) == HIDP_ERR_ARG);
@@ -503,6 +512,7 @@ static void test_bad_args(void)
 
 static void test_alloc_failure(void)
 {
+    hidp_parse_options_t o = {0, failing_alloc, failing_free, NULL};
     hidp_desc_t *d;
     int status;
     int n;
@@ -510,8 +520,9 @@ static void test_alloc_failure(void)
     for (n = 0;; n++) {
         failing_alloc_t fa = {n, 0};
 
+        o.alloc_ctx = &fa;
         d = NULL;
-        status = hidp_desc_parse(mouse, sizeof(mouse), 0, failing_alloc, failing_free, &fa, &d, NULL);
+        status = hidp_desc_parse(mouse, sizeof(mouse), &o, &d, NULL);
         hidp_desc_destroy(d);
         CHECK(fa.live == 0);
         if (status == HIDP_OK)

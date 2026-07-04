@@ -1,4 +1,4 @@
-<abi-corpus version='3.0' architecture='elf-amd-x86_64' soname='libhid-parser.so.1' tracking-non-reachable-types='yes'>
+<abi-corpus version='3.0' architecture='elf-amd-x86_64' soname='libhid-parser.so.2' tracking-non-reachable-types='yes'>
   <elf-needed>
     <dependency name='libc.so.6'/>
   </elf-needed>
@@ -18,11 +18,12 @@
     <elf-symbol name='hidp_desc_warning' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_desc_warning_count' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_field_array_usage' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
-    <elf-symbol name='hidp_field_get' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_field_in_range' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
-    <elf-symbol name='hidp_field_set' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='hidp_field_read' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_field_usage' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='hidp_field_write' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_item_name' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='hidp_item_write' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_report_decode' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_report_init' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
     <elf-symbol name='hidp_strerror' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
@@ -53,7 +54,7 @@
     <pointer-type-def type-id='type-id-21' size-in-bits='64' hash='b62330bb63b95ac0' id='type-id-22'/>
     <qualified-type-def type-id='type-id-23' const='yes' hash='d12fb7846f6277ad' id='type-id-24'/>
     <pointer-type-def type-id='type-id-24' size-in-bits='64' hash='dd3c25b2195e0192' id='type-id-25'/>
-    <qualified-type-def type-id='type-id-26' const='yes' hash='a4f40901570549cd' id='type-id-27'/>
+    <qualified-type-def type-id='type-id-26' const='yes' hash='c2b9880d04d664de' id='type-id-27'/>
     <pointer-type-def type-id='type-id-27' size-in-bits='64' hash='f441bbd771fe5e83' id='type-id-28'/>
     <qualified-type-def type-id='type-id-29' const='yes' hash='201e4804ebe39bf9' id='type-id-30'/>
     <pointer-type-def type-id='type-id-30' size-in-bits='64' hash='52d6528162fbf897' id='type-id-31'/>
@@ -123,7 +124,7 @@
       <parameter type-id='type-id-52'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='f441b1cd600e668f' id='type-id-53'>
+    <function-type size-in-bits='64' hash='11f48e26c4726ef6' id='type-id-53'>
       <parameter type-id='type-id-13'/>
       <parameter type-id='type-id-34'/>
       <parameter type-id='type-id-42'/>
@@ -131,12 +132,12 @@
       <parameter type-id='type-id-54'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='0db31c5a66c0d8dd' id='type-id-55'>
+    <function-type size-in-bits='64' hash='2a5b139a65508a57' id='type-id-55'>
       <parameter type-id='type-id-13'/>
       <parameter type-id='type-id-56'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='8b077acc59b3f6e4' id='type-id-57'>
+    <function-type size-in-bits='64' hash='576956faa1ebeb27' id='type-id-57'>
       <parameter type-id='type-id-13'/>
       <parameter type-id='type-id-56'/>
       <parameter type-id='type-id-58'/>
@@ -148,7 +149,7 @@
       <parameter type-id='type-id-58'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='821ff08f1706e8e5' id='type-id-60'>
+    <function-type size-in-bits='64' hash='b13d5eb0a982f408' id='type-id-60'>
       <parameter type-id='type-id-13'/>
       <parameter type-id='type-id-61'/>
       <parameter type-id='type-id-42'/>
@@ -184,53 +185,63 @@
       <parameter type-id='type-id-42'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='674662ad261e59a7' id='type-id-68'>
+    <function-type size-in-bits='64' hash='1ba7507cb64cd2b9' id='type-id-68'>
+      <parameter type-id='type-id-61'/>
+      <parameter type-id='type-id-42'/>
+      <parameter type-id='type-id-40'/>
+      <parameter type-id='type-id-40'/>
+      <parameter type-id='type-id-56'/>
+      <parameter type-id='type-id-52'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='865cd4c80940ee93' id='type-id-69'>
+    <function-type size-in-bits='64' hash='674662ad261e59a7' id='type-id-69'>
+      <return type-id='type-id-36'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='865cd4c80940ee93' id='type-id-70'>
       <parameter type-id='type-id-50'/>
       <parameter type-id='type-id-16'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='7ec058677841f152' id='type-id-70'>
+    <function-type size-in-bits='64' hash='7ec058677841f152' id='type-id-71'>
       <parameter type-id='type-id-50'/>
       <parameter type-id='type-id-28'/>
       <return type-id='type-id-36'/>
     </function-type>
-    <function-type size-in-bits='64' hash='ee890ba8437b5e9e' id='type-id-71'>
+    <function-type size-in-bits='64' hash='ee890ba8437b5e9e' id='type-id-72'>
       <parameter type-id='type-id-10'/>
       <return type-id='type-id-42'/>
     </function-type>
-    <function-type size-in-bits='64' hash='c4b222e72fcf64d4' id='type-id-72'>
+    <function-type size-in-bits='64' hash='c4b222e72fcf64d4' id='type-id-73'>
       <parameter type-id='type-id-10'/>
       <return type-id='type-id-40'/>
     </function-type>
-    <function-type size-in-bits='64' hash='1bcd17c9334bd7fd' id='type-id-73'>
+    <function-type size-in-bits='64' hash='1bcd17c9334bd7fd' id='type-id-74'>
       <parameter type-id='type-id-38'/>
       <return type-id='type-id-40'/>
     </function-type>
-    <function-type size-in-bits='64' hash='f2c00d2b9c811598' id='type-id-74'>
-      <parameter type-id='type-id-75'/>
-      <return type-id='type-id-76'/>
+    <function-type size-in-bits='64' hash='f2c00d2b9c811598' id='type-id-75'>
+      <parameter type-id='type-id-76'/>
+      <return type-id='type-id-77'/>
     </function-type>
-    <function-type size-in-bits='64' hash='edf938d82551349a' id='type-id-77'>
+    <function-type size-in-bits='64' hash='edf938d82551349a' id='type-id-78'>
       <parameter type-id='type-id-50'/>
       <parameter type-id='type-id-50'/>
-      <return type-id='type-id-76'/>
+      <return type-id='type-id-77'/>
     </function-type>
-    <function-type size-in-bits='64' hash='dbc09a9870c76547' id='type-id-78'>
+    <function-type size-in-bits='64' hash='dbc09a9870c76547' id='type-id-79'>
       <parameter type-id='type-id-50'/>
       <parameter type-id='type-id-42'/>
       <return type-id='type-id-50'/>
     </function-type>
-    <pointer-type-def type-id='type-id-8' size-in-bits='64' hash='5758281f52c520fe' id='type-id-75'/>
-    <pointer-type-def type-id='type-id-75' size-in-bits='64' hash='a8cb9204ef661e1a' id='type-id-64'/>
+    <pointer-type-def type-id='type-id-8' size-in-bits='64' hash='5758281f52c520fe' id='type-id-76'/>
+    <pointer-type-def type-id='type-id-76' size-in-bits='64' hash='a8cb9204ef661e1a' id='type-id-64'/>
     <type-decl name='int' size-in-bits='32' hash='09d17c08f594edc7' id='type-id-36'/>
-    <pointer-type-def type-id='type-id-69' size-in-bits='64' hash='745f6bf8c94fe73a' id='type-id-79'/>
-    <pointer-type-def type-id='type-id-70' size-in-bits='64' hash='b50d4d84c0e6e1c9' id='type-id-80'/>
-    <pointer-type-def type-id='type-id-56' size-in-bits='64' hash='e520cc4b8835b4e3' id='type-id-54'/>
+    <pointer-type-def type-id='type-id-70' size-in-bits='64' hash='745f6bf8c94fe73a' id='type-id-80'/>
+    <pointer-type-def type-id='type-id-71' size-in-bits='64' hash='b50d4d84c0e6e1c9' id='type-id-81'/>
+    <pointer-type-def type-id='type-id-56' size-in-bits='64' hash='dd52c01115fe3642' id='type-id-54'/>
+    <type-decl name='long int' size-in-bits='64' hash='8aa1e1a2ab2c2d3e' id='type-id-82'/>
     <pointer-type-def type-id='type-id-42' size-in-bits='64' hash='fce61c10660e5f2d' id='type-id-52'/>
-    <class-decl name='hidp_collection' is-struct='yes' visibility='default' size-in-bits='256' hash='1815c3be8ac6f590' id='type-id-81'>
+    <class-decl name='hidp_collection' is-struct='yes' visibility='default' size-in-bits='256' hash='1815c3be8ac6f590' id='type-id-83'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='type' type-id='type-id-40' visibility='default'/>
       </data-member>
@@ -247,33 +258,33 @@
         <var-decl name='desc_offset' type-id='type-id-42' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_desc' is-struct='yes' visibility='default' size-in-bits='1152' hash='c66c07305c017843' id='type-id-82'>
+    <class-decl name='hidp_desc' is-struct='yes' visibility='default' size-in-bits='1152' hash='c66c07305c017843' id='type-id-84'>
       <data-member access='public' layout-offset-in-bits='0'>
-        <var-decl name='alloc_fn' type-id='type-id-83' visibility='default'/>
+        <var-decl name='alloc_fn' type-id='type-id-85' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='64'>
-        <var-decl name='free_fn' type-id='type-id-84' visibility='default'/>
+        <var-decl name='free_fn' type-id='type-id-86' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='128'>
         <var-decl name='alloc_ctx' type-id='type-id-50' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='192'>
-        <var-decl name='fields' type-id='type-id-85' visibility='default'/>
+        <var-decl name='fields' type-id='type-id-87' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='384'>
-        <var-decl name='ranges' type-id='type-id-85' visibility='default'/>
+        <var-decl name='ranges' type-id='type-id-87' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='576'>
-        <var-decl name='collections' type-id='type-id-85' visibility='default'/>
+        <var-decl name='collections' type-id='type-id-87' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='768'>
-        <var-decl name='reports' type-id='type-id-85' visibility='default'/>
+        <var-decl name='reports' type-id='type-id-87' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='960'>
-        <var-decl name='warnings' type-id='type-id-85' visibility='default'/>
+        <var-decl name='warnings' type-id='type-id-87' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_field' is-struct='yes' visibility='default' size-in-bits='768' hash='80569b26675a3403' id='type-id-86'>
+    <class-decl name='hidp_field' is-struct='yes' visibility='default' size-in-bits='768' hash='80569b26675a3403' id='type-id-88'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='report_type' type-id='type-id-40' visibility='default'/>
       </data-member>
@@ -293,19 +304,19 @@
         <var-decl name='flags' type-id='type-id-40' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='224'>
-        <var-decl name='logical_min' type-id='type-id-56' visibility='default'/>
+        <var-decl name='logical_min' type-id='type-id-89' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='256'>
-        <var-decl name='logical_max' type-id='type-id-56' visibility='default'/>
+        <var-decl name='logical_max' type-id='type-id-89' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='288'>
-        <var-decl name='physical_min' type-id='type-id-56' visibility='default'/>
+        <var-decl name='physical_min' type-id='type-id-89' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='320'>
-        <var-decl name='physical_max' type-id='type-id-56' visibility='default'/>
+        <var-decl name='physical_max' type-id='type-id-89' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='352'>
-        <var-decl name='unit_exponent' type-id='type-id-56' visibility='default'/>
+        <var-decl name='unit_exponent' type-id='type-id-89' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='384'>
         <var-decl name='unit' type-id='type-id-38' visibility='default'/>
@@ -329,7 +340,7 @@
         <var-decl name='desc_offset' type-id='type-id-42' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_item' is-struct='yes' visibility='default' size-in-bits='384' hash='8e4c3dea91985da8' id='type-id-87'>
+    <class-decl name='hidp_item' is-struct='yes' visibility='default' size-in-bits='384' hash='8e4c3dea91985da8' id='type-id-90'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='offset' type-id='type-id-42' visibility='default'/>
       </data-member>
@@ -349,27 +360,27 @@
         <var-decl name='udata' type-id='type-id-38' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='256'>
-        <var-decl name='sdata' type-id='type-id-56' visibility='default'/>
+        <var-decl name='sdata' type-id='type-id-89' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='320'>
         <var-decl name='data' type-id='type-id-34' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_parse_options' is-struct='yes' visibility='default' size-in-bits='256' hash='63ccc6b41fb6c6f2' id='type-id-88'>
+    <class-decl name='hidp_parse_options' is-struct='yes' visibility='default' size-in-bits='256' hash='63ccc6b41fb6c6f2' id='type-id-91'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='flags' type-id='type-id-40' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='64'>
-        <var-decl name='alloc_fn' type-id='type-id-83' visibility='default'/>
+        <var-decl name='alloc_fn' type-id='type-id-85' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='128'>
-        <var-decl name='free_fn' type-id='type-id-84' visibility='default'/>
+        <var-decl name='free_fn' type-id='type-id-86' visibility='default'/>
       </data-member>
       <data-member access='public' layout-offset-in-bits='192'>
         <var-decl name='alloc_ctx' type-id='type-id-50' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_report' is-struct='yes' visibility='default' size-in-bits='192' hash='75be99bd85d19309' id='type-id-89'>
+    <class-decl name='hidp_report' is-struct='yes' visibility='default' size-in-bits='192' hash='75be99bd85d19309' id='type-id-92'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='type' type-id='type-id-40' visibility='default'/>
       </data-member>
@@ -383,7 +394,7 @@
         <var-decl name='byte_len' type-id='type-id-42' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_usage_range' is-struct='yes' visibility='default' size-in-bits='64' hash='c4b5e77dd77a9d44' id='type-id-90'>
+    <class-decl name='hidp_usage_range' is-struct='yes' visibility='default' size-in-bits='64' hash='c4b5e77dd77a9d44' id='type-id-93'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='min' type-id='type-id-38' visibility='default'/>
       </data-member>
@@ -391,7 +402,7 @@
         <var-decl name='max' type-id='type-id-38' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_value' is-struct='yes' visibility='default' size-in-bits='256' hash='880f35876798bec8' id='type-id-91'>
+    <class-decl name='hidp_value' is-struct='yes' visibility='default' size-in-bits='320' hash='239f76d25c52a263' id='type-id-94'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='field' type-id='type-id-13' visibility='default'/>
       </data-member>
@@ -404,11 +415,11 @@
       <data-member access='public' layout-offset-in-bits='192'>
         <var-decl name='usage' type-id='type-id-38' visibility='default'/>
       </data-member>
-      <data-member access='public' layout-offset-in-bits='224'>
+      <data-member access='public' layout-offset-in-bits='256'>
         <var-decl name='value' type-id='type-id-56' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_vec' is-struct='yes' visibility='default' size-in-bits='192' hash='5e2a1ca6212f9984' id='type-id-92'>
+    <class-decl name='hidp_vec' is-struct='yes' visibility='default' size-in-bits='192' hash='5e2a1ca6212f9984' id='type-id-95'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='data' type-id='type-id-50' visibility='default'/>
       </data-member>
@@ -419,7 +430,7 @@
         <var-decl name='cap' type-id='type-id-42' visibility='default'/>
       </data-member>
     </class-decl>
-    <class-decl name='hidp_warning' is-struct='yes' visibility='default' size-in-bits='128' hash='f6bcc7426c146f86' id='type-id-93'>
+    <class-decl name='hidp_warning' is-struct='yes' visibility='default' size-in-bits='128' hash='f6bcc7426c146f86' id='type-id-96'>
       <data-member access='public' layout-offset-in-bits='0'>
         <var-decl name='offset' type-id='type-id-42' visibility='default'/>
       </data-member>
@@ -427,39 +438,41 @@
         <var-decl name='code' type-id='type-id-36' visibility='default'/>
       </data-member>
     </class-decl>
-    <typedef-decl name='__int32_t' type-id='type-id-36' size-in-bits='32' hash='f2b82e49c8af56cd' id='type-id-94'/>
-    <typedef-decl name='__uint32_t' type-id='type-id-40' size-in-bits='32' hash='01b265816e53dd71' id='type-id-95'/>
-    <typedef-decl name='hidp_alloc_fn' type-id='type-id-96' size-in-bits='64' hash='77dcac2fc426a312' id='type-id-83'/>
-    <typedef-decl name='hidp_collection_t' type-id='type-id-81' size-in-bits='256' hash='d8195485efc31066' id='type-id-5'/>
-    <typedef-decl name='hidp_desc_t' type-id='type-id-82' size-in-bits='1152' hash='d43ff919eb7366fe' id='type-id-8'/>
-    <typedef-decl name='hidp_field_t' type-id='type-id-86' size-in-bits='768' hash='2ef451e9ffbc0645' id='type-id-11'/>
-    <typedef-decl name='hidp_free_fn' type-id='type-id-97' size-in-bits='64' hash='21d4fa73e6c6f741' id='type-id-84'/>
-    <typedef-decl name='hidp_item_fn' type-id='type-id-79' size-in-bits='64' hash='62e5396631afe5bb' id='type-id-66'/>
-    <typedef-decl name='hidp_item_t' type-id='type-id-87' size-in-bits='384' hash='28d805b10acb78f3' id='type-id-14'/>
-    <typedef-decl name='hidp_parse_options_t' type-id='type-id-88' size-in-bits='256' hash='45b2e1c93ba2c215' id='type-id-17'/>
-    <typedef-decl name='hidp_report_t' type-id='type-id-89' size-in-bits='192' hash='9f64df842889d676' id='type-id-20'/>
-    <typedef-decl name='hidp_usage_range_t' type-id='type-id-90' size-in-bits='64' hash='5038a2c66ba55b28' id='type-id-23'/>
-    <typedef-decl name='hidp_value_fn' type-id='type-id-80' size-in-bits='64' hash='e88e760c1ed17a45' id='type-id-49'/>
-    <typedef-decl name='hidp_value_t' type-id='type-id-91' size-in-bits='256' hash='ce14a223245be47d' id='type-id-26'/>
-    <typedef-decl name='hidp_vec_t' type-id='type-id-92' size-in-bits='192' hash='9977e9d432728799' id='type-id-85'/>
-    <typedef-decl name='hidp_warning_t' type-id='type-id-93' size-in-bits='128' hash='cf509507f60a7ea6' id='type-id-29'/>
-    <typedef-decl name='int32_t' type-id='type-id-94' size-in-bits='32' hash='f2b82e49c8af56cd' id='type-id-56'/>
-    <typedef-decl name='size_t' type-id='type-id-98' size-in-bits='64' hash='8b230c0ebd12548b' id='type-id-42'/>
-    <typedef-decl name='uint32_t' type-id='type-id-95' size-in-bits='32' hash='01b265816e53dd71' id='type-id-38'/>
+    <typedef-decl name='__int32_t' type-id='type-id-36' size-in-bits='32' hash='f2b82e49c8af56cd' id='type-id-97'/>
+    <typedef-decl name='__int64_t' type-id='type-id-82' size-in-bits='64' hash='567f7af3a2d00f27' id='type-id-98'/>
+    <typedef-decl name='__uint32_t' type-id='type-id-40' size-in-bits='32' hash='01b265816e53dd71' id='type-id-99'/>
+    <typedef-decl name='hidp_alloc_fn' type-id='type-id-100' size-in-bits='64' hash='77dcac2fc426a312' id='type-id-85'/>
+    <typedef-decl name='hidp_collection_t' type-id='type-id-83' size-in-bits='256' hash='d8195485efc31066' id='type-id-5'/>
+    <typedef-decl name='hidp_desc_t' type-id='type-id-84' size-in-bits='1152' hash='d43ff919eb7366fe' id='type-id-8'/>
+    <typedef-decl name='hidp_field_t' type-id='type-id-88' size-in-bits='768' hash='2ef451e9ffbc0645' id='type-id-11'/>
+    <typedef-decl name='hidp_free_fn' type-id='type-id-101' size-in-bits='64' hash='21d4fa73e6c6f741' id='type-id-86'/>
+    <typedef-decl name='hidp_item_fn' type-id='type-id-80' size-in-bits='64' hash='62e5396631afe5bb' id='type-id-66'/>
+    <typedef-decl name='hidp_item_t' type-id='type-id-90' size-in-bits='384' hash='28d805b10acb78f3' id='type-id-14'/>
+    <typedef-decl name='hidp_parse_options_t' type-id='type-id-91' size-in-bits='256' hash='45b2e1c93ba2c215' id='type-id-17'/>
+    <typedef-decl name='hidp_report_t' type-id='type-id-92' size-in-bits='192' hash='9f64df842889d676' id='type-id-20'/>
+    <typedef-decl name='hidp_usage_range_t' type-id='type-id-93' size-in-bits='64' hash='5038a2c66ba55b28' id='type-id-23'/>
+    <typedef-decl name='hidp_value_fn' type-id='type-id-81' size-in-bits='64' hash='e88e760c1ed17a45' id='type-id-49'/>
+    <typedef-decl name='hidp_value_t' type-id='type-id-94' size-in-bits='320' hash='8548aa9d155bacfd' id='type-id-26'/>
+    <typedef-decl name='hidp_vec_t' type-id='type-id-95' size-in-bits='192' hash='9977e9d432728799' id='type-id-87'/>
+    <typedef-decl name='hidp_warning_t' type-id='type-id-96' size-in-bits='128' hash='cf509507f60a7ea6' id='type-id-29'/>
+    <typedef-decl name='int32_t' type-id='type-id-97' size-in-bits='32' hash='f2b82e49c8af56cd' id='type-id-89'/>
+    <typedef-decl name='int64_t' type-id='type-id-98' size-in-bits='64' hash='567f7af3a2d00f27' id='type-id-56'/>
+    <typedef-decl name='size_t' type-id='type-id-102' size-in-bits='64' hash='8b230c0ebd12548b' id='type-id-42'/>
+    <typedef-decl name='uint32_t' type-id='type-id-99' size-in-bits='32' hash='01b265816e53dd71' id='type-id-38'/>
     <pointer-type-def type-id='type-id-38' size-in-bits='64' hash='e0052ce3dc4c319c' id='type-id-58'/>
     <type-decl name='unsigned char' size-in-bits='8' hash='6ebac62b3366db68' id='type-id-32'/>
     <pointer-type-def type-id='type-id-32' size-in-bits='64' hash='daf9679977094cab' id='type-id-61'/>
     <type-decl name='unsigned int' size-in-bits='32' hash='e66b43f97c38e87a' id='type-id-40'/>
-    <type-decl name='unsigned long int' size-in-bits='64' hash='da551c1631705dfe' id='type-id-98'/>
-    <type-decl name='void' hash='8dcbc64750c3d4e3' id='type-id-76'/>
-    <pointer-type-def type-id='type-id-77' size-in-bits='64' hash='c559852600f1c7c8' id='type-id-97'/>
-    <pointer-type-def type-id='type-id-76' hash='19e246ce75ee6a42' id='type-id-50'/>
-    <pointer-type-def type-id='type-id-78' size-in-bits='64' hash='2390ef35ddf7f554' id='type-id-96'/>
+    <type-decl name='unsigned long int' size-in-bits='64' hash='da551c1631705dfe' id='type-id-102'/>
+    <type-decl name='void' hash='8dcbc64750c3d4e3' id='type-id-77'/>
+    <pointer-type-def type-id='type-id-78' size-in-bits='64' hash='c559852600f1c7c8' id='type-id-101'/>
+    <pointer-type-def type-id='type-id-77' hash='19e246ce75ee6a42' id='type-id-50'/>
+    <pointer-type-def type-id='type-id-79' size-in-bits='64' hash='2390ef35ddf7f554' id='type-id-100'/>
   </abi-types>
   <abi-instr address-size='64' path='src/classify.c' language='LANG_C99'>
-      <function-decl name='hidp_desc_kind' type-id='type-id-72' mangled-name='hidp_desc_kind' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_kind'/>
-      <function-decl name='hidp_usage_kind' type-id='type-id-73' mangled-name='hidp_usage_kind' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_usage_kind'/>
-      <function-decl name='hidp_usage_role' type-id='type-id-73' mangled-name='hidp_usage_role' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_usage_role'/>
+      <function-decl name='hidp_desc_kind' type-id='type-id-73' mangled-name='hidp_desc_kind' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_kind'/>
+      <function-decl name='hidp_usage_kind' type-id='type-id-74' mangled-name='hidp_usage_kind' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_usage_kind'/>
+      <function-decl name='hidp_usage_role' type-id='type-id-74' mangled-name='hidp_usage_role' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_usage_role'/>
   </abi-instr>
   <abi-instr address-size='64' path='src/desc.c' language='LANG_C99'>
       <function-decl name='hidp_desc_collection' type-id='type-id-41' mangled-name='hidp_desc_collection' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_collection'/>
@@ -470,28 +483,29 @@
       <function-decl name='hidp_desc_warning' type-id='type-id-47' mangled-name='hidp_desc_warning' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_warning'/>
       <function-decl name='hidp_desc_find_usage' type-id='type-id-51' mangled-name='hidp_desc_find_usage' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_find_usage'/>
       <function-decl name='hidp_field_array_usage' type-id='type-id-57' mangled-name='hidp_field_array_usage' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_field_array_usage'/>
-      <function-decl name='hidp_field_get' type-id='type-id-53' mangled-name='hidp_field_get' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_field_get'/>
       <function-decl name='hidp_field_in_range' type-id='type-id-55' mangled-name='hidp_field_in_range' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_field_in_range'/>
-      <function-decl name='hidp_field_set' type-id='type-id-60' mangled-name='hidp_field_set' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_field_set'/>
+      <function-decl name='hidp_field_read' type-id='type-id-53' mangled-name='hidp_field_read' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_field_read'/>
       <function-decl name='hidp_field_usage' type-id='type-id-59' mangled-name='hidp_field_usage' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_field_usage'/>
+      <function-decl name='hidp_field_write' type-id='type-id-60' mangled-name='hidp_field_write' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_field_write'/>
       <function-decl name='hidp_report_decode' type-id='type-id-48' mangled-name='hidp_report_decode' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_report_decode'/>
       <function-decl name='hidp_report_init' type-id='type-id-62' mangled-name='hidp_report_init' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_report_init'/>
-      <function-decl name='hidp_desc_collection_count' type-id='type-id-71' mangled-name='hidp_desc_collection_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_collection_count'/>
-      <function-decl name='hidp_desc_field_count' type-id='type-id-71' mangled-name='hidp_desc_field_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_field_count'/>
-      <function-decl name='hidp_desc_report_count' type-id='type-id-71' mangled-name='hidp_desc_report_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_report_count'/>
-      <function-decl name='hidp_desc_warning_count' type-id='type-id-71' mangled-name='hidp_desc_warning_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_warning_count'/>
+      <function-decl name='hidp_desc_collection_count' type-id='type-id-72' mangled-name='hidp_desc_collection_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_collection_count'/>
+      <function-decl name='hidp_desc_field_count' type-id='type-id-72' mangled-name='hidp_desc_field_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_field_count'/>
+      <function-decl name='hidp_desc_report_count' type-id='type-id-72' mangled-name='hidp_desc_report_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_report_count'/>
+      <function-decl name='hidp_desc_warning_count' type-id='type-id-72' mangled-name='hidp_desc_warning_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_warning_count'/>
   </abi-instr>
   <abi-instr address-size='64' path='src/names.c' language='LANG_C99'>
       <function-decl name='hidp_item_name' type-id='type-id-39' mangled-name='hidp_item_name' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_item_name'/>
       <function-decl name='hidp_strerror' type-id='type-id-35' mangled-name='hidp_strerror' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_strerror'/>
       <function-decl name='hidp_usage_format' type-id='type-id-67' mangled-name='hidp_usage_format' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_usage_format'/>
-      <function-decl name='hidp_version' type-id='type-id-68' mangled-name='hidp_version' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_version'/>
+      <function-decl name='hidp_version' type-id='type-id-69' mangled-name='hidp_version' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_version'/>
   </abi-instr>
   <abi-instr address-size='64' path='src/parse.c' language='LANG_C99'>
       <function-decl name='hidp_desc_parse' type-id='type-id-63' mangled-name='hidp_desc_parse' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_parse'/>
-      <function-decl name='hidp_desc_destroy' type-id='type-id-74' mangled-name='hidp_desc_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_destroy'/>
+      <function-decl name='hidp_desc_destroy' type-id='type-id-75' mangled-name='hidp_desc_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_desc_destroy'/>
   </abi-instr>
   <abi-instr address-size='64' path='src/tokenize.c' language='LANG_C99'>
+      <function-decl name='hidp_item_write' type-id='type-id-68' mangled-name='hidp_item_write' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_item_write'/>
       <function-decl name='hidp_tokenize' type-id='type-id-65' mangled-name='hidp_tokenize' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='hidp_tokenize'/>
   </abi-instr>
   <abi-instr address-size='64' path='src/usage_names.c' language='LANG_C99'>

@@ -10,12 +10,12 @@ int main(void)
 {
     const unsigned char report[1] = {0xf0};
     hidp_desc_t *d = NULL;
-    int32_t value = 0;
+    int64_t value = 0;
     int status;
 
     status = hidp_desc_parse(desc, sizeof(desc), NULL, &d, NULL);
     if (status == HIDP_OK)
-        status = hidp_field_get(hidp_desc_field(d, 0), report, sizeof(report), 0, &value);
+        status = hidp_field_read(hidp_desc_field(d, 0), report, sizeof(report), 0, &value);
     if (hidp_strerror(status) == NULL)
         status = HIDP_ERR_ARG;
     hidp_desc_destroy(d);

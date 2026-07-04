@@ -179,7 +179,7 @@ static int print_value(void *ctx, const hidp_value_t *v)
     if (!(v->field->flags & HIDP_FLAG_VARIABLE))
         printf("%s\n", name);
     else
-        printf("%s = %ld%s\n", name, (long)v->value,
+        printf("%s = %lld%s\n", name, (long long)v->value,
                hidp_field_in_range(v->field, v->value) ? "" : " (null)");
     return 0;
 }

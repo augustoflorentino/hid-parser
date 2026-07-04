@@ -50,8 +50,7 @@ static void walk_field(const hidp_desc_t *desc, const hidp_field_t *f, const uin
     const hidp_report_t *r = hidp_desc_find_report(desc, f->report_type, f->report_id);
     unsigned char *buf;
     uint32_t usage;
-    int32_t value;
-    int64_t wide;
+    int64_t value;
     size_t i;
     int status;
 
@@ -70,16 +69,11 @@ static void walk_field(const hidp_desc_t *desc, const hidp_field_t *f, const uin
     if (r->id != 0u)
         buf[0] = (unsigned char)r->id;
     for (i = 0; i < f->report_count && i < 64u; i++) {
-        if (hidp_field_get(f, buf, r->byte_len, i, &value) != HIDP_OK)
+        if (hidp_field_read(f, buf, r->byte_len, i, &value) != HIDP_OK)
             continue;
-        if (hidp_field_set(f, buf, r->byte_len, i, value) != HIDP_OK)
+        if (hidp_field_write(f, buf, r->byte_len, i, value) != HIDP_OK)
             abort();
         hidp_field_array_usage(f, value, &usage);
-        if (hidp_field_read(f, buf, r->byte_len, i, &wide) != HIDP_OK
-            || hidp_field_write(f, buf, r->byte_len, i, wide) != HIDP_OK)
-            abort();
-        if ((int64_t)value != wide && !(f->logical_min >= 0 && wide > INT32_MAX))
-            abort();
     }
     status = hidp_report_decode(desc, r->type, buf, r->byte_len, check_value, (void *)desc);
     if (status != HIDP_OK && r->id != 0u)

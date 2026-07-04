@@ -392,7 +392,7 @@ static void test_values(void)
     const hidp_field_t *arr;
     hidp_desc_t *d;
     uint32_t usage;
-    int32_t v = 0;
+    int64_t v = 0;
     size_t fi = 0;
     size_t ui = 0;
 
@@ -406,25 +406,25 @@ static void test_values(void)
     axes = hidp_desc_field(d, 0);
     wheel = hidp_desc_field(d, 1);
     arr = hidp_desc_field(d, 2);
-    CHECK(hidp_field_set(axes, rep, 10, 0, 0xabc) == HIDP_OK);
-    CHECK(hidp_field_set(axes, rep, 10, 1, 0x123) == HIDP_OK);
+    CHECK(hidp_field_write(axes, rep, 10, 0, 0xabc) == HIDP_OK);
+    CHECK(hidp_field_write(axes, rep, 10, 1, 0x123) == HIDP_OK);
     CHECK(rep[1] == 0xbc && rep[2] == 0x3a && rep[3] == 0x12);
-    CHECK(hidp_field_set(axes, rep, 10, 2, 1) == HIDP_ERR_BOUNDS);
-    CHECK(hidp_field_set(axes, rep, 10, 0, 0x1000) == HIDP_ERR_RANGE);
-    CHECK(hidp_field_set(wheel, rep, 10, 0, -3) == HIDP_OK);
-    CHECK(hidp_field_get(wheel, rep, 10, 0, &v) == HIDP_OK && v == -3);
-    CHECK(hidp_field_get(axes, rep, 10, 1, &v) == HIDP_OK && v == 0x123);
-    CHECK(hidp_field_get(axes, rep, 3, 1, &v) == HIDP_ERR_BOUNDS);
+    CHECK(hidp_field_write(axes, rep, 10, 2, 1) == HIDP_ERR_BOUNDS);
+    CHECK(hidp_field_write(axes, rep, 10, 0, 0x1000) == HIDP_ERR_RANGE);
+    CHECK(hidp_field_write(wheel, rep, 10, 0, -3) == HIDP_OK);
+    CHECK(hidp_field_read(wheel, rep, 10, 0, &v) == HIDP_OK && v == -3);
+    CHECK(hidp_field_read(axes, rep, 10, 1, &v) == HIDP_OK && v == 0x123);
+    CHECK(hidp_field_read(axes, rep, 3, 1, &v) == HIDP_ERR_BOUNDS);
     rep[0] = 4;
-    CHECK(hidp_field_get(axes, rep, 10, 0, &v) == HIDP_ERR_NOT_FOUND);
+    CHECK(hidp_field_read(axes, rep, 10, 0, &v) == HIDP_ERR_NOT_FOUND);
     rep[0] = 3;
-    CHECK(hidp_field_set(arr, rep, 10, 0, 2) == HIDP_OK);
-    CHECK(hidp_field_get(arr, rep, 10, 0, &v) == HIDP_OK && v == 2);
+    CHECK(hidp_field_write(arr, rep, 10, 0, 2) == HIDP_OK);
+    CHECK(hidp_field_read(arr, rep, 10, 0, &v) == HIDP_OK && v == 2);
     CHECK(hidp_field_array_usage(arr, v, &usage) == HIDP_OK && usage == 0x00090002);
     CHECK(hidp_field_array_usage(arr, 0, &usage) == HIDP_ERR_NOT_FOUND);
     CHECK(hidp_field_array_usage(axes, 0, &usage) == HIDP_ERR_ARG);
     CHECK(hidp_field_in_range(wheel, -8) && !hidp_field_in_range(wheel, 8));
-    CHECK(hidp_field_get(hidp_desc_field(d, 3), rep, 10, 0, &v) == HIDP_ERR_RANGE);
+    CHECK(hidp_field_read(hidp_desc_field(d, 3), rep, 10, 0, &v) == HIDP_ERR_RANGE);
     CHECK(hidp_desc_find_usage(d, HIDP_INPUT, 0x00090003, 0, &fi, &ui) == HIDP_OK);
     CHECK(fi == 2 && ui == 2);
     CHECK(hidp_desc_find_usage(d, HIDP_INPUT, 0x31, 0, &fi, &ui) == HIDP_OK && fi == 1);
@@ -478,7 +478,7 @@ static void test_bad_args(void)
 {
     hidp_desc_t *d = NULL;
     uint32_t usage;
-    int32_t v;
+    int64_t v;
     int i;
 
     hidp_parse_options_t o = {0, NULL, NULL, NULL};
@@ -496,8 +496,8 @@ static void test_bad_args(void)
     CHECK(hidp_desc_find_report(NULL, 0, 0) == NULL);
     CHECK(hidp_desc_find_usage(NULL, 0, 0, 0, NULL, NULL) == HIDP_ERR_ARG);
     CHECK(hidp_field_usage(NULL, 0, &usage) == HIDP_ERR_ARG);
-    CHECK(hidp_field_get(NULL, mouse, 1, 0, &v) == HIDP_ERR_ARG);
-    CHECK(hidp_field_set(NULL, NULL, 0, 0, 0) == HIDP_ERR_ARG);
+    CHECK(hidp_field_read(NULL, mouse, 1, 0, &v) == HIDP_ERR_ARG);
+    CHECK(hidp_field_write(NULL, NULL, 0, 0, 0) == HIDP_ERR_ARG);
     CHECK(hidp_field_in_range(NULL, 0) == 0);
     CHECK(hidp_report_init(NULL, NULL, 0) == HIDP_ERR_ARG);
     for (i = -1; i <= HIDP_ERR_STOPPED + 1; i++)
@@ -534,7 +534,7 @@ static void test_alloc_failure(void)
 
 typedef struct {
     uint32_t usages[16];
-    int32_t values[16];
+    int64_t values[16];
     size_t len;
     size_t stop_after;
 } decoded_t;
@@ -646,6 +646,7 @@ static void test_field_read_write(void)
     unsigned char report[6] = {0};
     const hidp_field_t *u32;
     const hidp_field_t *s16;
+    decoded_t got = {{0}, {0}, 0, 0};
     hidp_desc_t *d;
     int64_t v;
 
@@ -661,6 +662,10 @@ static void test_field_read_write(void)
     CHECK(hidp_field_write(s16, report, sizeof(report), 0, 32768) == HIDP_ERR_RANGE);
     CHECK(hidp_field_read(s16, report, 3, 0, &v) == HIDP_ERR_BOUNDS);
     CHECK(hidp_field_read(NULL, report, sizeof(report), 0, &v) == HIDP_ERR_ARG);
+    CHECK(hidp_field_write(u32, report, sizeof(report), 0, 0xfffffffe) == HIDP_OK);
+    CHECK(hidp_field_in_range(u32, 0xfffffffe) && !hidp_field_in_range(u32, -2));
+    CHECK(hidp_report_decode(d, HIDP_INPUT, report, sizeof(report), collect, &got) == HIDP_OK);
+    CHECK(got.len == 2 && got.values[0] == 0xfffffffe && got.values[1] == -32768);
     hidp_desc_destroy(d);
 }
 

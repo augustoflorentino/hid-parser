@@ -205,7 +205,7 @@ typedef struct hidp_value {
     size_t field_index;
     size_t index;
     uint32_t usage;
-    int32_t value;
+    int64_t value;
 } hidp_value_t;
 
 typedef int (*hidp_value_fn)(void *ctx, const hidp_value_t *value);
@@ -242,17 +242,13 @@ HIDP_API int hidp_desc_find_usage(const hidp_desc_t *desc, unsigned type, uint32
                                   size_t start_field, size_t *out_field, size_t *out_index);
 
 HIDP_API int hidp_field_usage(const hidp_field_t *field, size_t index, uint32_t *out_usage);
-HIDP_API int hidp_field_get(const hidp_field_t *field, const unsigned char *report,
-                            size_t report_len, size_t index, int32_t *out_value);
 HIDP_API int hidp_field_read(const hidp_field_t *field, const unsigned char *report,
                              size_t report_len, size_t index, int64_t *out_value);
 HIDP_API int hidp_field_write(const hidp_field_t *field, unsigned char *report, size_t report_len,
                               size_t index, int64_t value);
-HIDP_API int hidp_field_set(const hidp_field_t *field, unsigned char *report, size_t report_len,
-                            size_t index, int32_t value);
-HIDP_API int hidp_field_array_usage(const hidp_field_t *field, int32_t value,
+HIDP_API int hidp_field_array_usage(const hidp_field_t *field, int64_t value,
                                     uint32_t *out_usage);
-HIDP_API int hidp_field_in_range(const hidp_field_t *field, int32_t value);
+HIDP_API int hidp_field_in_range(const hidp_field_t *field, int64_t value);
 HIDP_API int hidp_report_decode(const hidp_desc_t *desc, unsigned type, const unsigned char *report,
                                 size_t report_len, hidp_value_fn value_fn, void *ctx);
 HIDP_API int hidp_report_init(const hidp_report_t *report, unsigned char *buf, size_t buf_len);

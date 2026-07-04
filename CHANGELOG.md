@@ -4,6 +4,19 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+Incompatible with 1.x: the soname is now `libhid-parser.so.2`.
+
+- values are `int64_t` across the API: `hidp_value_t.value`, `hidp_field_in_range` and
+  `hidp_field_array_usage`. An unsigned 32-bit field above `INT32_MAX` used to reach
+  `hidp_report_decode` callers as a negative number
+- `hidp_field_get` and `hidp_field_set`, deprecated in 1.2.0, are removed
+
+### Upgrading
+
+- `hidp_field_get` becomes `hidp_field_read` and `hidp_field_set` becomes `hidp_field_write`,
+  with `int64_t` values
+- read `hidp_value_t.value` as `int64_t`
+
 ## 1.2.0 - 2026-07-03
 
 - `hidp_item_write`: encode one short item in the smallest size that holds its value; signed

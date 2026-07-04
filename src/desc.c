@@ -127,31 +127,6 @@ static int hidp_id_matches(const hidp_field_t *field, const unsigned char *repor
     return field->report_id == 0u || report[0] == field->report_id;
 }
 
-int hidp_field_get(const hidp_field_t *field, const unsigned char *report, size_t report_len,
-                   size_t index, int32_t *out_value)
-{
-    size_t bit;
-    int64_t sv;
-    uint64_t uv;
-    int status;
-
-    if (field == NULL || report == NULL || out_value == NULL)
-        return HIDP_ERR_ARG;
-    status = hidp_field_bits(field, report_len, index, &bit);
-    if (status != HIDP_OK)
-        return status;
-    if (!hidp_id_matches(field, report))
-        return HIDP_ERR_NOT_FOUND;
-    if (field->logical_min < 0) {
-        bitf_get_signed(report, report_len, bit, field->report_size, BITF_LE, &sv);
-        *out_value = (int32_t)sv;
-        return HIDP_OK;
-    }
-    bitf_get(report, report_len, bit, field->report_size, BITF_LE, &uv);
-    *out_value = uv <= (uint64_t)INT32_MAX ? (int32_t)uv : -(int32_t)(~(uint32_t)uv) - 1;
-    return HIDP_OK;
-}
-
 int hidp_field_read(const hidp_field_t *field, const unsigned char *report, size_t report_len,
                     size_t index, int64_t *out_value)
 {
@@ -195,46 +170,26 @@ int hidp_field_write(const hidp_field_t *field, unsigned char *report, size_t re
     return status == BITF_OK ? HIDP_OK : HIDP_ERR_RANGE;
 }
 
-int hidp_field_set(const hidp_field_t *field, unsigned char *report, size_t report_len,
-                   size_t index, int32_t value)
-{
-    size_t bit;
-    int status;
-
-    if (field == NULL || report == NULL)
-        return HIDP_ERR_ARG;
-    status = hidp_field_bits(field, report_len, index, &bit);
-    if (status != HIDP_OK)
-        return status;
-    if (!hidp_id_matches(field, report))
-        return HIDP_ERR_NOT_FOUND;
-    if (field->logical_min < 0)
-        status = bitf_set_signed(report, report_len, bit, field->report_size, BITF_LE, value);
-    else
-        status = bitf_set(report, report_len, bit, field->report_size, BITF_LE,
-                          (uint64_t)(uint32_t)value);
-    return status == BITF_OK ? HIDP_OK : HIDP_ERR_RANGE;
-}
-
-int hidp_field_in_range(const hidp_field_t *field, int32_t value)
+int hidp_field_in_range(const hidp_field_t *field, int64_t value)
 {
     if (field == NULL)
         return 0;
     if (field->logical_min < 0)
         return value >= field->logical_min && value <= field->logical_max;
-    return (uint32_t)value >= (uint32_t)field->logical_min
-           && (uint32_t)value <= (uint32_t)field->logical_max;
+    return value >= (int64_t)(uint32_t)field->logical_min
+           && value <= (int64_t)(uint32_t)field->logical_max;
 }
 
-int hidp_field_array_usage(const hidp_field_t *field, int32_t value, uint32_t *out_usage)
+int hidp_field_array_usage(const hidp_field_t *field, int64_t value, uint32_t *out_usage)
 {
     if (field == NULL || out_usage == NULL || (field->flags & HIDP_FLAG_VARIABLE))
         return HIDP_ERR_ARG;
     if (!hidp_field_in_range(field, value))
         return HIDP_ERR_NOT_FOUND;
-    if ((uint32_t)value - (uint32_t)field->logical_min >= field->usage_count)
+    value -= field->logical_min < 0 ? field->logical_min : (int64_t)(uint32_t)field->logical_min;
+    if ((uint64_t)value >= field->usage_count)
         return HIDP_ERR_NOT_FOUND;
-    return hidp_field_usage(field, (uint32_t)value - (uint32_t)field->logical_min, out_usage);
+    return hidp_field_usage(field, (size_t)value, out_usage);
 }
 
 static int hidp_decode_field(const hidp_field_t *f, size_t field_index,
@@ -249,7 +204,7 @@ static int hidp_decode_field(const hidp_field_t *f, size_t field_index,
     v.field = f;
     v.field_index = field_index;
     for (v.index = 0; v.index < f->report_count; v.index++) {
-        if (hidp_field_get(f, report, len, v.index, &v.value) != HIDP_OK)
+        if (hidp_field_read(f, report, len, v.index, &v.value) != HIDP_OK)
             return HIDP_ERR_BOUNDS;
         v.usage = 0;
         if (f->flags & HIDP_FLAG_VARIABLE)

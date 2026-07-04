@@ -4,6 +4,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 2.0.0 - 2026-07-03
+
 Incompatible with 1.x: the soname is now `libhid-parser.so.2`.
 
 - values are `int64_t` across the API: `hidp_value_t.value`, `hidp_field_in_range` and

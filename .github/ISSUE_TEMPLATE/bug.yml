@@ -1,0 +1,43 @@
+name: Descriptor parsed wrong
+description: A field, collection or report comes out different from what the device means
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        On Linux the descriptor is in `/sys/class/hidraw/hidrawN/device/report_descriptor`.
+        `xxd -p` or `od -An -tx1` turns it into hex.
+  - type: textarea
+    id: descriptor
+    attributes:
+      label: Report descriptor (hex)
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Name, USB vendor and product id, interface number
+      placeholder: "USB mouse, 1234:abcd, interface 0"
+    validations:
+      required: true
+  - type: textarea
+    id: hiddump
+    attributes:
+      label: hiddump output
+      description: Output of `hiddump` for that descriptor, with the mode you used (--strict, --tolerant)
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What the kernel or the device does instead
+  - type: input
+    id: version
+    attributes:
+      label: hid-parser version
+      placeholder: 3.4.0
+    validations:
+      required: true

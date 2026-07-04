@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security report
+    url: https://github.com/augustoflorentino/hid-parser/security/advisories/new
+    about: A descriptor that crashes the parser or makes it read out of bounds

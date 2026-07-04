@@ -100,8 +100,8 @@ static void print_usages(const hidp_field_t *f)
     size_t i;
 
     for (i = 0; i < f->usages_len; i++) {
-        hidp_usage_format(f->usages[i].min, lo, sizeof(lo));
-        hidp_usage_format(f->usages[i].max, hi, sizeof(hi));
+        hidp_usage_print(f->usages[i].min, lo, sizeof(lo));
+        hidp_usage_print(f->usages[i].max, hi, sizeof(hi));
         if (f->usages[i].min == f->usages[i].max)
             printf("%s%s", i ? ", " : "", lo);
         else
@@ -175,7 +175,7 @@ static int print_value(void *ctx, const hidp_value_t *v)
     char name[96];
 
     (void)ctx;
-    hidp_usage_format(v->usage, name, sizeof(name));
+    hidp_usage_print(v->usage, name, sizeof(name));
     if (!(v->field->flags & HIDP_FLAG_VARIABLE))
         printf("%s\n", name);
     else

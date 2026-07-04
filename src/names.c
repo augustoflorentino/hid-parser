@@ -68,15 +68,18 @@ static int hidp_generated_page(uint32_t page)
     return page == 0x09u || page == 0x0au || page == 0x81u;
 }
 
-int hidp_usage_format(uint32_t usage, char *buf, size_t buf_len)
+size_t hidp_usage_print(uint32_t usage, char *buf, size_t buf_len)
 {
     const char *name = hidp_usage_name(usage);
     const char *page = hidp_usage_page_name(usage >> 16);
     uint32_t id = usage & 0xffffu;
+    char scratch[1];
     int n;
 
-    if (buf == NULL || buf_len == 0u)
-        return HIDP_ERR_ARG;
+    if (buf == NULL || buf_len == 0u) {
+        buf = scratch;
+        buf_len = sizeof(scratch);
+    }
     if (name != NULL && hidp_generated_page(usage >> 16))
         n = snprintf(buf, buf_len, "%s %lu", name, (unsigned long)id);
     else if (name != NULL)
@@ -85,7 +88,14 @@ int hidp_usage_format(uint32_t usage, char *buf, size_t buf_len)
         n = snprintf(buf, buf_len, "%s 0x%04lx", page, (unsigned long)id);
     else
         n = snprintf(buf, buf_len, "0x%08lx", (unsigned long)usage);
-    return n >= 0 && (size_t)n < buf_len ? HIDP_OK : HIDP_ERR_BOUNDS;
+    return n > 0 ? (size_t)n : 0u;
+}
+
+int hidp_usage_format(uint32_t usage, char *buf, size_t buf_len)
+{
+    if (buf == NULL || buf_len == 0u)
+        return HIDP_ERR_ARG;
+    return hidp_usage_print(usage, buf, buf_len) < buf_len ? HIDP_OK : HIDP_ERR_BOUNDS;
 }
 
 int hidp_version(void)

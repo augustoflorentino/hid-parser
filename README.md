@@ -15,7 +15,7 @@ system with a C99 compiler.
 - classification of devices (`hidp_desc_kind`) and usages (`hidp_usage_role`: button, axis,
   hat, key, LED, haptic)
 - usage names from the HID Usage Tables 1.7, in their own object file so a static link only
-  pulls them in when you call `hidp_usage_name`, `hidp_usage_page_name` or `hidp_usage_format`
+  pulls them in when you call `hidp_usage_name`, `hidp_usage_page_name` or `hidp_usage_print`
 
 ## Quick look
 

@@ -4,6 +4,13 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+- `hidp_usage_print`: like `snprintf`, returns the length the full name needs, so a caller
+  can size the buffer; `NULL` with length 0 only measures
+
+### Deprecated
+
+- `hidp_usage_format`: use `hidp_usage_print`. It goes away in 3.0
+
 ## 2.0.0 - 2026-07-03
 
 Incompatible with 1.x: the soname is now `libhid-parser.so.2`.

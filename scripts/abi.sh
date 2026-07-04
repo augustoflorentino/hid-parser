@@ -17,7 +17,7 @@ fi
 
 if [ "$mode" = save ]; then
     mkdir -p "$(dirname "$baseline")"
-    abidw --out-file "$baseline" "$lib"
+    abidw --no-corpus-path --no-comp-dir-path --no-show-locs --out-file "$baseline" "$lib"
     echo "baseline saved: $baseline"
     exit 0
 fi
@@ -34,7 +34,7 @@ if [ "$base_soname" != "$soname" ]; then
 fi
 
 set +e
-abidiff --no-added-syms "$baseline" "$lib"
+abidiff --no-added-syms --hd1 "$root/include/hid-parser" --hd2 "$root/include/hid-parser" "$baseline" "$lib"
 status=$?
 set -e
 if (( status & 3 )); then

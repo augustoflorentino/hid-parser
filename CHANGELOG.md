@@ -4,6 +4,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 1.2.0 - 2026-07-03
+
 - `hidp_item_write`: encode one short item in the smallest size that holds its value; signed
   globals get the size that keeps their sign, so a Logical Maximum of 255 takes two bytes
 - `hidp_field_read` and `hidp_field_write` take the value as `int64_t`. `hidp_field_get`

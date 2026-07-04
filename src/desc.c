@@ -27,6 +27,19 @@ const hidp_collection_t *hidp_desc_collection(const hidp_desc_t *desc, size_t in
     return (const hidp_collection_t *)desc->collections.data + index;
 }
 
+size_t hidp_desc_application(const hidp_desc_t *desc, size_t collection)
+{
+    const hidp_collection_t *c = hidp_desc_collection(desc, collection);
+    size_t found = HIDP_NONE;
+
+    for (; c != NULL; c = hidp_desc_collection(desc, c->parent)) {
+        if (c->type == HIDP_COLLECTION_APPLICATION)
+            found = collection;
+        collection = c->parent;
+    }
+    return found;
+}
+
 size_t hidp_desc_report_count(const hidp_desc_t *desc)
 {
     return desc != NULL ? desc->reports.len : 0u;

@@ -673,12 +673,34 @@ static void test_field_read_write(void)
     hidp_desc_destroy(d);
 }
 
+static void test_application(void)
+{
+    static const unsigned char two[] = {
+        0x05, 0x01, 0x09, 0x06, 0xa1, 0x01, 0x85, 0x01, 0x05, 0x07, 0x09, 0x04, 0x75, 0x08,
+        0x95, 0x01, 0x81, 0x00, 0xc0, 0x05, 0x0c, 0x09, 0x01, 0xa1, 0x01, 0x85, 0x02, 0x09,
+        0x02, 0xa1, 0x02, 0x09, 0xe9, 0x75, 0x01, 0x81, 0x02, 0xc0, 0xc0, 0x09, 0x30, 0x81,
+        0x02,
+    };
+    hidp_desc_t *d;
+    size_t app;
+
+    CHECK(PARSE(two, 0, &d) == HIDP_OK);
+    CHECK(hidp_desc_application(d, hidp_desc_field(d, 0)->collection) == 0);
+    app = hidp_desc_application(d, hidp_desc_field(d, 1)->collection);
+    CHECK(app == 1 && hidp_desc_collection(d, app)->usage == 0x000c0001);
+    CHECK(hidp_desc_application(d, hidp_desc_field(d, 2)->collection) == HIDP_NONE);
+    CHECK(hidp_desc_application(d, 99) == HIDP_NONE);
+    CHECK(hidp_desc_application(NULL, 0) == HIDP_NONE);
+    hidp_desc_destroy(d);
+}
+
 int main(void)
 {
     CHECK(hidp_version() == HIDP_VERSION);
     test_decode();
     test_item_write();
     test_field_read_write();
+    test_application();
     test_tokenize();
     test_mouse();
     test_report_ids();

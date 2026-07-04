@@ -12,6 +12,8 @@ system with a C99 compiler.
   with its byte offset
 - values: read and write any field of up to 32 bits as `int64_t`, signed when the logical
   minimum is negative, so unsigned 32-bit fields keep their whole range; map array values to usages; check null state with `hidp_field_in_range`
+- `hidp_desc_application`: the top-level application collection a field or collection belongs
+  to, to split composite devices such as a keyboard with media keys
 - classification of devices (`hidp_desc_kind`) and usages (`hidp_usage_role`: button, axis,
   hat, key, LED, haptic)
 - usage names from the HID Usage Tables 1.7, in their own object file so a static link only

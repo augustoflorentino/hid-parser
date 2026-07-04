@@ -6,6 +6,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 - `hidp_usage_print`: like `snprintf`, returns the length the full name needs, so a caller
   can size the buffer; `NULL` with length 0 only measures
+- `hidp_desc_application`: the outermost application collection around a collection, or
+  `HIDP_NONE`
 
 ### Deprecated
 

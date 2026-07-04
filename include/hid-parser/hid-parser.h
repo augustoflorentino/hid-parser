@@ -236,6 +236,7 @@ HIDP_API const hidp_report_t *hidp_desc_find_report(const hidp_desc_t *desc, uns
 HIDP_API const hidp_report_t *hidp_desc_match_report(const hidp_desc_t *desc, unsigned type,
                                                       const unsigned char *report,
                                                       size_t report_len);
+HIDP_API size_t hidp_desc_application(const hidp_desc_t *desc, size_t collection);
 HIDP_API size_t hidp_desc_warning_count(const hidp_desc_t *desc);
 HIDP_API const hidp_warning_t *hidp_desc_warning(const hidp_desc_t *desc, size_t index);
 HIDP_API int hidp_desc_find_usage(const hidp_desc_t *desc, unsigned type, uint32_t usage,

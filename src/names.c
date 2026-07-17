@@ -91,13 +91,6 @@ size_t hidp_usage_print(uint32_t usage, char *buf, size_t buf_len)
     return n > 0 ? (size_t)n : 0u;
 }
 
-int hidp_usage_format(uint32_t usage, char *buf, size_t buf_len)
-{
-    if (buf == NULL || buf_len == 0u)
-        return HIDP_ERR_ARG;
-    return hidp_usage_print(usage, buf, buf_len) < buf_len ? HIDP_OK : HIDP_ERR_BOUNDS;
-}
-
 int hidp_version(void)
 {
     return HIDP_VERSION;

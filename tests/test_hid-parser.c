@@ -465,13 +465,10 @@ static void test_format(void)
 {
     char buf[64];
 
-    CHECK(hidp_usage_format(0x00090005, buf, sizeof(buf)) == HIDP_OK && strcmp(buf, "Button 5") == 0);
-    CHECK(hidp_usage_format(0x00010030, buf, sizeof(buf)) == HIDP_OK && strcmp(buf, "X") == 0);
-    CHECK(hidp_usage_format(0xff000001, buf, sizeof(buf)) == HIDP_OK);
+    CHECK(hidp_usage_print(0x00090005, buf, sizeof(buf)) == 8 && strcmp(buf, "Button 5") == 0);
+    CHECK(hidp_usage_print(0xff000001, buf, sizeof(buf)) == 21);
     CHECK(strcmp(buf, "Vendor-defined 0x0001") == 0);
-    CHECK(hidp_usage_format(0x7f000001, buf, sizeof(buf)) == HIDP_OK && strcmp(buf, "0x7f000001") == 0);
-    CHECK(hidp_usage_format(0x00090005, buf, 8) == HIDP_ERR_BOUNDS && strcmp(buf, "Button ") == 0);
-    CHECK(hidp_usage_format(0x00090005, NULL, 8) == HIDP_ERR_ARG);
+    CHECK(hidp_usage_print(0x7f000001, buf, sizeof(buf)) == 10 && strcmp(buf, "0x7f000001") == 0);
     CHECK(hidp_usage_print(0x00090005, NULL, 0) == 8);
     CHECK(hidp_usage_print(0x00090005, buf, 4) == 8 && strcmp(buf, "But") == 0);
     CHECK(hidp_usage_print(0x00010030, buf, sizeof(buf)) == 1 && strcmp(buf, "X") == 0);

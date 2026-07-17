@@ -4,6 +4,15 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+Incompatible with 2.x: the soname is now `libhid-parser.so.3`.
+
+- `hidp_usage_format`, deprecated in 2.3.0, is removed
+
+### Upgrading
+
+Replace `hidp_usage_format(usage, buf, len) == HIDP_OK` with
+`hidp_usage_print(usage, buf, len) < len`.
+
 ## 2.3.0 - 2026-07-03
 
 - `hidp_usage_print`: like `snprintf`, returns the length the full name needs, so a caller

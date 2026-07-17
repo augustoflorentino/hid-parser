@@ -257,7 +257,6 @@ HIDP_API int hidp_report_init(const hidp_report_t *report, unsigned char *buf, s
 HIDP_API const char *hidp_usage_page_name(uint32_t page);
 HIDP_API const char *hidp_usage_name(uint32_t usage);
 HIDP_API size_t hidp_usage_print(uint32_t usage, char *buf, size_t buf_len);
-HIDP_API int hidp_usage_format(uint32_t usage, char *buf, size_t buf_len);
 HIDP_API unsigned hidp_usage_kind(uint32_t usage);
 HIDP_API unsigned hidp_desc_kind(const hidp_desc_t *desc);
 HIDP_API unsigned hidp_usage_role(uint32_t usage);

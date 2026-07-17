@@ -88,7 +88,9 @@ To build a descriptor, `hidp_item_write` encodes one short item in the smallest 
 keeps its value, reading Logical/Physical Minimum and Maximum and Unit Exponent as signed.
 
 To send a report, find it with `hidp_desc_find_report`, clear it with `hidp_report_init` (which
-also writes the report ID) and fill it with `hidp_field_write`.
+also writes the report ID) and fill it with `hidp_field_write`, or by usage with
+`hidp_report_set_usage`, which looks the control up in the report whose ID is in the first
+byte.
 
 [`examples/hiddump.c`](examples/hiddump.c) prints a descriptor as an item tree (`--items`), as
 reports and fields, or as one line per value (`--slots`); `--hex` reads hex text instead of

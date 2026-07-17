@@ -252,6 +252,8 @@ HIDP_API int hidp_field_array_usage(const hidp_field_t *field, int64_t value,
 HIDP_API int hidp_field_in_range(const hidp_field_t *field, int64_t value);
 HIDP_API int hidp_report_decode(const hidp_desc_t *desc, unsigned type, const unsigned char *report,
                                 size_t report_len, hidp_value_fn value_fn, void *ctx);
+HIDP_API int hidp_report_set_usage(const hidp_desc_t *desc, unsigned type, unsigned char *report,
+                                   size_t report_len, uint32_t usage, int64_t value);
 HIDP_API int hidp_report_init(const hidp_report_t *report, unsigned char *buf, size_t buf_len);
 
 HIDP_API const char *hidp_usage_page_name(uint32_t page);

@@ -296,6 +296,27 @@ int hidp_desc_find_usage(const hidp_desc_t *desc, unsigned type, uint32_t usage,
     return HIDP_ERR_NOT_FOUND;
 }
 
+int hidp_report_set_usage(const hidp_desc_t *desc, unsigned type, unsigned char *report,
+                          size_t report_len, uint32_t usage, int64_t value)
+{
+    const hidp_report_t *r;
+    const hidp_field_t *f;
+    size_t field = 0;
+    size_t index;
+
+    if (desc == NULL || report == NULL || report_len == 0u)
+        return HIDP_ERR_ARG;
+    r = hidp_desc_match_report(desc, type, report, report_len);
+    if (r == NULL)
+        return HIDP_ERR_NOT_FOUND;
+    for (; hidp_desc_find_usage(desc, type, usage, field, &field, &index) == HIDP_OK; field++) {
+        f = hidp_desc_field(desc, field);
+        if (f->report_id == r->id && (f->flags & HIDP_FLAG_VARIABLE))
+            return hidp_field_write(f, report, report_len, index, value);
+    }
+    return HIDP_ERR_NOT_FOUND;
+}
+
 int hidp_report_init(const hidp_report_t *report, unsigned char *buf, size_t buf_len)
 {
     if (report == NULL || buf == NULL)

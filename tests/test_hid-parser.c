@@ -691,6 +691,32 @@ static void test_application(void)
     hidp_desc_destroy(d);
 }
 
+static void test_set_usage(void)
+{
+    static const unsigned char rumble[] = {
+        0x05, 0x01, 0x09, 0x05, 0xa1, 0x01, 0x85, 0x01, 0x09, 0x30, 0x75, 0x08, 0x95, 0x01,
+        0x81, 0x02, 0x85, 0x05, 0x06, 0x00, 0xff, 0x09, 0x01, 0x09, 0x02, 0x15, 0x00, 0x26,
+        0xff, 0x00, 0x95, 0x02, 0x91, 0x02, 0x85, 0x06, 0x09, 0x01, 0x95, 0x01, 0x91, 0x02,
+        0xc0,
+    };
+    unsigned char out[3];
+    hidp_desc_t *d;
+
+    CHECK(PARSE(rumble, 0, &d) == HIDP_OK);
+    CHECK(hidp_report_init(hidp_desc_find_report(d, HIDP_OUTPUT, 5), out, sizeof(out)) == HIDP_OK);
+    CHECK(hidp_report_set_usage(d, HIDP_OUTPUT, out, sizeof(out), 0xff000002, 200) == HIDP_OK);
+    CHECK(hidp_report_set_usage(d, HIDP_OUTPUT, out, sizeof(out), 0xff000001, 17) == HIDP_OK);
+    CHECK(out[0] == 5 && out[1] == 17 && out[2] == 200);
+    CHECK(hidp_report_set_usage(d, HIDP_OUTPUT, out, sizeof(out), 0xff000001, 256) == HIDP_ERR_RANGE);
+    CHECK(hidp_report_set_usage(d, HIDP_OUTPUT, out, sizeof(out), 0x00010030, 1) == HIDP_ERR_NOT_FOUND);
+    out[0] = 6;
+    CHECK(hidp_report_set_usage(d, HIDP_OUTPUT, out, 2, 0xff000001, 9) == HIDP_OK && out[1] == 9);
+    CHECK(hidp_report_set_usage(d, HIDP_OUTPUT, out, 2, 0xff000002, 9) == HIDP_ERR_NOT_FOUND);
+    out[0] = 7;
+    CHECK(hidp_report_set_usage(d, HIDP_OUTPUT, out, 2, 0xff000001, 9) == HIDP_ERR_NOT_FOUND);
+    hidp_desc_destroy(d);
+}
+
 int main(void)
 {
     CHECK(hidp_version() == HIDP_VERSION);
@@ -698,6 +724,7 @@ int main(void)
     test_item_write();
     test_field_read_write();
     test_application();
+    test_set_usage();
     test_tokenize();
     test_mouse();
     test_report_ids();

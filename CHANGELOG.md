@@ -4,6 +4,9 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+- `hidp_report_set_usage`: write a variable control of a report by its usage, such as the
+  motor strength of an output report
+
 ## 3.0.0 - 2026-07-17
 
 Incompatible with 2.x: the soname is now `libhid-parser.so.3`.

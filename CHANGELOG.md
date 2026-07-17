@@ -4,6 +4,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 3.0.0 - 2026-07-17
+
 Incompatible with 2.x: the soname is now `libhid-parser.so.3`.
 
 - `hidp_usage_format`, deprecated in 2.3.0, is removed

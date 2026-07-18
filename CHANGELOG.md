@@ -6,6 +6,9 @@ Each release lists what changed, what updating means for existing code, and ever
 
 - `hidp_report_set_usage`: write a variable control of a report by its usage, such as the
   motor strength of an output report
+- fix: `hidp_desc_find_usage` returned a slot past the report count when a variable field
+  declares more usages than values, as in Usage Minimum 1, Maximum 16 with Report Count 8;
+  it now skips those usages, which carry no value, and finds the field that does
 - `hiddump --type output|feature` decodes output and feature reports with `--report`
 
 ## 3.0.0 - 2026-07-17

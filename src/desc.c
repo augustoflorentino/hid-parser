@@ -287,6 +287,8 @@ int hidp_desc_find_usage(const hidp_desc_t *desc, unsigned type, uint32_t usage,
         f = hidp_desc_field(desc, i);
         if (f->report_type != type || !hidp_field_index_of(f, usage, &index))
             continue;
+        if ((f->flags & HIDP_FLAG_VARIABLE) && index >= f->report_count)
+            continue;
         if (out_field != NULL)
             *out_field = i;
         if (out_index != NULL)

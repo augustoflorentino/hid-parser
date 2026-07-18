@@ -717,6 +717,28 @@ static void test_set_usage(void)
     hidp_desc_destroy(d);
 }
 
+static void test_find_usage_past_count(void)
+{
+    static const unsigned char desc[] = {
+        0x05, 0x09, 0x19, 0x01, 0x29, 0x10, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x08,
+        0x81, 0x02, 0x09, 0x0c, 0x95, 0x01, 0x81, 0x02, 0x75, 0x07, 0x81, 0x01,
+    };
+    unsigned char rep[2] = {0, 0};
+    size_t field = 0;
+    size_t index = 0;
+    hidp_desc_t *d;
+
+    CHECK(PARSE(desc, 0, &d) == HIDP_OK);
+    CHECK(hidp_desc_find_usage(d, HIDP_INPUT, 0x00090008, 0, &field, &index) == HIDP_OK);
+    CHECK(field == 0 && index == 7);
+    CHECK(hidp_desc_find_usage(d, HIDP_INPUT, 0x0009000c, 0, &field, &index) == HIDP_OK);
+    CHECK(field == 1 && index == 0);
+    CHECK(hidp_desc_find_usage(d, HIDP_INPUT, 0x00090009, 0, &field, &index) == HIDP_ERR_NOT_FOUND);
+    CHECK(hidp_report_set_usage(d, HIDP_INPUT, rep, sizeof(rep), 0x0009000c, 1) == HIDP_OK);
+    CHECK(rep[0] == 0 && rep[1] == 1);
+    hidp_desc_destroy(d);
+}
+
 int main(void)
 {
     CHECK(hidp_version() == HIDP_VERSION);
@@ -725,6 +747,7 @@ int main(void)
     test_field_read_write();
     test_application();
     test_set_usage();
+    test_find_usage_past_count();
     test_tokenize();
     test_mouse();
     test_report_ids();

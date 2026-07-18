@@ -4,6 +4,8 @@ Each release lists what changed, what updating means for existing code, and ever
 
 ## Unreleased
 
+## 3.4.0 - 2026-07-17
+
 - `hidp_report_set_usage`: write a variable control of a report by its usage, such as the
   motor strength of an output report
 - fix: `hidp_desc_find_usage` returned a slot past the report count when a variable field

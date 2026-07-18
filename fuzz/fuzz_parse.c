@@ -78,7 +78,24 @@ static void walk_field(const hidp_desc_t *desc, const hidp_field_t *f, const uin
     status = hidp_report_decode(desc, r->type, buf, r->byte_len, check_value, (void *)desc);
     if (status != HIDP_OK && r->id != 0u)
         abort();
+    if ((f->flags & HIDP_FLAG_VARIABLE) && f->usage_count > 0u && f->report_count > 0u
+        && f->report_size > 0u && f->report_size <= 32u && r->id != 0u
+        && hidp_field_usage(f, 0, &usage) == HIDP_OK) {
+        status = hidp_report_set_usage(desc, r->type, buf, r->byte_len, usage, f->logical_min);
+        if (status != HIDP_OK && status != HIDP_ERR_RANGE)
+            abort();
+    }
     free(buf);
+}
+
+static void check_application(const hidp_desc_t *desc, size_t collection)
+{
+    size_t app = hidp_desc_application(desc, collection);
+
+    if (app == HIDP_NONE)
+        return;
+    if (app > collection || hidp_desc_collection(desc, app)->type != HIDP_COLLECTION_APPLICATION)
+        abort();
 }
 
 static void parse(const uint8_t *data, size_t size, unsigned flags)
@@ -92,6 +109,8 @@ static void parse(const uint8_t *data, size_t size, unsigned flags)
         return;
     for (i = 0; i < hidp_desc_field_count(desc); i++)
         walk_field(desc, hidp_desc_field(desc, i), data, size);
+    for (i = 0; i < hidp_desc_collection_count(desc); i++)
+        check_application(desc, i);
     for (i = 0; i < hidp_desc_collection_count(desc); i++)
         if (hidp_desc_collection(desc, i)->parent != HIDP_NONE
             && hidp_desc_collection(desc, i)->parent >= i)

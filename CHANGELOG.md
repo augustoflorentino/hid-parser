@@ -6,6 +6,7 @@ Each release lists what changed, what updating means for existing code, and ever
 
 - `hidp_report_set_usage`: write a variable control of a report by its usage, such as the
   motor strength of an output report
+- `hiddump --type output|feature` decodes output and feature reports with `--report`
 
 ## 3.0.0 - 2026-07-17
 

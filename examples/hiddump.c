@@ -184,9 +184,9 @@ static int print_value(void *ctx, const hidp_value_t *v)
     return 0;
 }
 
-static int decode(const hidp_desc_t *desc, const unsigned char *report, size_t len)
+static int decode(const hidp_desc_t *desc, unsigned type, const unsigned char *report, size_t len)
 {
-    int status = hidp_report_decode(desc, HIDP_INPUT, report, len, print_value, NULL);
+    int status = hidp_report_decode(desc, type, report, len, print_value, NULL);
 
     if (status != HIDP_OK)
         fprintf(stderr, "report of %zu bytes: %s\n", len, hidp_strerror(status));
@@ -223,15 +223,30 @@ static void dump(const hidp_desc_t *desc, int slots)
                hidp_strerror(hidp_desc_warning(desc, i)->code));
 }
 
+static int report_type(const char *name, unsigned *type)
+{
+    unsigned i;
+
+    for (i = 0; i < 3u; i++)
+        if (strcmp(name, type_names[i]) == 0 || (name[0] | 32) == (type_names[i][0] | 32)) {
+            *type = i;
+            return 0;
+        }
+    return 1;
+}
+
 static int parse_args(int argc, char **argv, unsigned *flags, int *slots, const char **path,
-                      char **report)
+                      char **report, unsigned *type)
 {
     int i;
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--report") == 0 && i + 1 < argc)
             *report = argv[++i];
-        else if (strcmp(argv[i], "--strict") == 0)
+        else if (strcmp(argv[i], "--type") == 0 && i + 1 < argc) {
+            if (report_type(argv[++i], type) != 0)
+                return 1;
+        } else if (strcmp(argv[i], "--strict") == 0)
             *flags = HIDP_PARSE_STRICT;
         else if (strcmp(argv[i], "--tolerant") == 0)
             *flags = HIDP_PARSE_TOLERANT;
@@ -255,6 +270,7 @@ int main(int argc, char **argv)
 {
     const char *path = NULL;
     char *report = NULL;
+    unsigned type = HIDP_INPUT;
     unsigned flags = 0;
     int slots = 0;
     FILE *in = stdin;
@@ -265,9 +281,9 @@ int main(int argc, char **argv)
     hidp_parse_options_t options = {0, NULL, NULL, NULL};
     int status;
 
-    if (parse_args(argc, argv, &flags, &slots, &path, &report) != 0) {
+    if (parse_args(argc, argv, &flags, &slots, &path, &report, &type) != 0) {
         fprintf(stderr, "usage: hiddump [--strict|--tolerant] [--slots|--fields|--items] [--hex] "
-                        "[--report HEX] [descriptor]\n");
+                        "[--report HEX [--type input|output|feature]] [descriptor]\n");
         return 2;
     }
     if (path != NULL && (in = fopen(path, "rb")) == NULL) {
@@ -300,7 +316,7 @@ int main(int argc, char **argv)
         return 1;
     }
     if (report != NULL)
-        status = decode(desc, (unsigned char *)report,
+        status = decode(desc, type, (unsigned char *)report,
                         parse_hex((unsigned char *)report, strlen(report)));
     else
         dump(desc, slots);

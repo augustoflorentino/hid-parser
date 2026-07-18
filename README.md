@@ -94,7 +94,8 @@ byte.
 
 [`examples/hiddump.c`](examples/hiddump.c) prints a descriptor as an item tree (`--items`), as
 reports and fields, or as one line per value (`--slots`); `--hex` reads hex text instead of
-binary, and `--report` decodes one input report given in hex:
+binary, and `--report` decodes one report given in hex, input unless `--type output` or
+`--type feature` says otherwise:
 
 ```sh
 hiddump /sys/class/hidraw/hidraw0/device/report_descriptor
